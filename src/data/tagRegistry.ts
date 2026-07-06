@@ -3,9 +3,6 @@ import { TAG_DEFINITIONS } from "./tagDefinitions";
 
 export { TAG_DEFINITIONS };
 
-/** 하위 호환 별칭 */
-export const TAG_REGISTRY: TagDef[] = TAG_DEFINITIONS;
-
 const byId = new Map(TAG_DEFINITIONS.map((t) => [t.tagId, t]));
 
 const aliasToId = new Map<string, string>();
@@ -43,8 +40,4 @@ export function resolveTagId(raw: string): string | null {
 
 export function allLegacyAliasesResolve(): boolean {
   return LEGACY_GAMEPLAY_ALIASES.every((alias) => resolveTagId(alias) !== null);
-}
-
-export function getTagsByCategory(category: import("./types").MvpCsvTagCategory): TagDef[] {
-  return TAG_DEFINITIONS.filter((t) => t.mvpCsvCategory === category);
 }

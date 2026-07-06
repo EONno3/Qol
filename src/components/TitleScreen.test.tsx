@@ -10,7 +10,7 @@ describe("TitleScreen 컴포넌트 단위 테스트", () => {
   beforeEach(() => {
     vi.resetAllMocks();
     // 글로벌 fetch 모킹 준비
-    global.fetch = vi.fn();
+    globalThis.fetch = vi.fn();
   });
 
   afterEach(() => {
@@ -19,7 +19,7 @@ describe("TitleScreen 컴포넌트 단위 테스트", () => {
 
   it("case 1: 첫 진입 시 AI 상태 진단 로딩 텍스트가 표시된다", () => {
     // 무한 대기 응답 모킹
-    (global.fetch as any).mockImplementation(() => new Promise(() => {}));
+    (globalThis.fetch as any).mockImplementation(() => new Promise(() => {}));
 
     render(
       <TitleScreen
@@ -36,7 +36,7 @@ describe("TitleScreen 컴포넌트 단위 테스트", () => {
 
   it("case 2: AI 서버 헬스체크 실패 시 OFFLINE이 되고 버튼이 비활성화된다", async () => {
     // 헬스체크 실패 모킹
-    (global.fetch as any).mockRejectedValue(new Error("Connection refused"));
+    (globalThis.fetch as any).mockRejectedValue(new Error("Connection refused"));
 
     render(
       <TitleScreen
@@ -63,7 +63,7 @@ describe("TitleScreen 컴포넌트 단위 테스트", () => {
 
   it("case 3: AI 서버 헬스체크 성공 시 ONLINE이 되고 새 게임이 활성화된다", async () => {
     // 헬스체크 성공 모킹
-    (global.fetch as any).mockResolvedValue({
+    (globalThis.fetch as any).mockResolvedValue({
       json: async () => ({ status: "ok" }),
     });
 
@@ -92,7 +92,7 @@ describe("TitleScreen 컴포넌트 단위 테스트", () => {
   });
 
   it("case 4: AI 온라인이고 저장 데이터가 존재할 때 불러오기 버튼이 활성화된다", async () => {
-    (global.fetch as any).mockResolvedValue({
+    (globalThis.fetch as any).mockResolvedValue({
       json: async () => ({ status: "ok" }),
     });
 
@@ -118,7 +118,7 @@ describe("TitleScreen 컴포넌트 단위 테스트", () => {
   });
 
   it("case 5: 저장 데이터 삭제 버튼 클릭 시 확인 창 승인 시 콜백이 작동한다", async () => {
-    (global.fetch as any).mockResolvedValue({
+    (globalThis.fetch as any).mockResolvedValue({
       json: async () => ({ status: "ok" }),
     });
     // window.confirm 모킹

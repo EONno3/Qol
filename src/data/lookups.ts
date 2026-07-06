@@ -6,10 +6,9 @@ import {
   mercenaries,
   allMissions,
   resultReports,
-  stats,
   statusDefs,
 } from "./seed";
-import type { MatchCase, Mercenary, Mission, ResultReport, StatKey } from "./types";
+import type { MatchCase, Mercenary, Mission, ResultReport } from "./types";
 import { calculateDynamicMatch, calculateDynamicReport } from "../domain/dynamicSystem";
 import type { DispatchLoadoutContext } from "../domain/gearStatBonus";
 
@@ -78,11 +77,6 @@ export function implantName(implantId: string): string {
 
 export function factionName(factionId: string): string {
   return factionNameById.get(factionId) ?? factionId;
-}
-
-const statNameById = new Map(stats.map((s) => [s.statKey, s.displayNameKo]));
-export function statName(statId: string): string {
-  return statNameById.get(statId.toLowerCase() as StatKey) ?? statId;
 }
 
 /** missionType은 이미 한글이므로 그대로 반환한다. (영문 타입 방어용 pass-through) */

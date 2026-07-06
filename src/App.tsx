@@ -86,7 +86,12 @@ export function App({ initialState, bypassTitle = false }: { initialState?: Game
     return loadedState;
   });
 
-  const isTestEnv = typeof process !== "undefined" && (process.env.NODE_ENV === "test" || typeof vi !== "undefined");
+  const testGlobal = globalThis as typeof globalThis & {
+    process?: { env?: Record<string, string | undefined> };
+  };
+  const isTestEnv =
+    !!testGlobal.process &&
+    (testGlobal.process.env?.NODE_ENV === "test" || typeof vi !== "undefined");
   const shouldBypass = bypassTitle || isTestEnv;
   const [screen, setScreen] = useState<Screen>(() => shouldBypass ? "board" : "title");
 

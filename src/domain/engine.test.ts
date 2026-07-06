@@ -257,7 +257,7 @@ describe("진입 게이트 (T-B-2)", () => {
     const result = simulateMission(mission, merc, () => 0.1);
 
     expect(result.report.resultType).toBe("failure");
-    expect(result.report.nodeLogKo.some((l) => l.includes("진입 게이트"))).toBe(true);
+    expect(result.report.nodeLogKo!.some((l) => l.includes("진입 게이트"))).toBe(true);
     expect(result.report.nodeResolutions?.length ?? 0).toBe(0);
   });
 
@@ -279,7 +279,7 @@ describe("진입 게이트 (T-B-2)", () => {
 
     const first = result.report.nodeResolutions?.[0];
     expect(first?.nameKo).toBe("적발 요격 전투");
-    expect(result.report.nodeLogKo.some((l) => l.includes("적발") || l.includes("위험"))).toBe(
+    expect(result.report.nodeLogKo!.some((l) => l.includes("적발") || l.includes("위험"))).toBe(
       true
     );
   });
@@ -309,7 +309,7 @@ describe("가시성 패널티 (T-B-3)", () => {
       (n) => n.nameKo.includes("경비대") || n.nameKo.includes("적발") || n.nameKo.includes("검문")
     );
     expect(riskNode).toBeDefined();
-    expect(result.report.nodeLogKo.some((l) => /가시성|적발|노출|검문/.test(l))).toBe(true);
+    expect(result.report.nodeLogKo!.some((l) => /가시성|적발|노출|검문/.test(l))).toBe(true);
   });
 
   it("T-B-3-E2: 잠입 + very_low 가시성 → 가시성 위험 노드 없음", () => {
@@ -323,7 +323,7 @@ describe("가시성 패널티 (T-B-3)", () => {
         /경비대|적발|검문/.test(n.nameKo)
       )
     ).toBe(false);
-    expect(result.report.nodeLogKo.some((l) => /가시성.*초과|노출 감지/.test(l))).toBe(false);
+    expect(result.report.nodeLogKo!.some((l) => /가시성.*초과|노출 감지/.test(l))).toBe(false);
   });
 
   it("T-B-3-E3: 지원 미션 + very_high 가시성 → 가시성 패널티 미발동", () => {

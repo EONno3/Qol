@@ -6,7 +6,6 @@ import type {
   NodeResolutionLog,
   NodeRole,
   ResultReport,
-  TagSourceType,
   TriggeredTag,
 } from "../data/types";
 import type { ChallengeTagReaction } from "../data/challengeTagPool";
@@ -190,9 +189,4 @@ export function buildNarratePayload(
     triggeredTags,
     nodeResolutions,
   };
-}
-
-/** JSON 직렬화용 — sourceType 검증 헬퍼 (테스트·문서용) */
-export function isKnownTagSourceType(value: string): value is TagSourceType {
-  return value === "mercenary" || value === "gear" || value === "implant" || value === "status";
 }

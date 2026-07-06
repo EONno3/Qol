@@ -7,7 +7,7 @@
  * 참고: static_data_spec.md Section 2.1 위치(Tier) 기본 가중치
  */
 
-import type { Mission, FixerOrigin, LocationTier } from "../data/types";
+import type { Mission, FixerOrigin, LocationTier, Tier } from "../data/types";
 import type { GameState } from "./state";
 
 // ─── 위치 × 미션 Tier 가중치 테이블 ────────────────────────────────────────

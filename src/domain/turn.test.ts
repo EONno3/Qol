@@ -1,7 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { createInitialState } from "./state";
 import { advanceTurn } from "./turn";
-import { missions } from "../data/seed";
 
 describe("advanceTurn", () => {
   it("턴 수를 1 증가시키고 통제력을 최대치로 회복한다", () => {

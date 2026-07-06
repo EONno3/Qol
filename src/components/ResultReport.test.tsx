@@ -25,6 +25,7 @@ const mockMerc: Mercenary = {
   aliasKo: "의적",
   originKo: "하층",
   contractTermsKo: "계약 조건",
+  systemTags: [],
   stats: { frame: 50, cool: 50, wire: 50, cypher: 50, pulse: 50 },
   maxHp: 100,
   visibilityLevel: "low",

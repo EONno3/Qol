@@ -1,9 +1,0 @@
-{
-  "has_persona": true,
-  "has_limit_adj": true,
-  "no_sensory_stack": true,
-  "no_sensory_hint": true,
-  "has_env_fact": true,
-  "has_triggered_fact": true,
-  "chars": 1592
-}

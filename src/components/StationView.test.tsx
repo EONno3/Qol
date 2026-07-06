@@ -2,7 +2,6 @@ import { render, screen, fireEvent } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 import { StationView } from "./StationView";
 import { createMockGameState, createMockStationState } from "../test/factories";
-import { GAME_CONFIG } from "../data/config";
 import { getUpgradeCost } from "../domain/station";
 
 // StationView는 seed.ts의 mercenaries를 내부에서 불러와 고용 목록을 렌더링한다.

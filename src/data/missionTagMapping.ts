@@ -1,5 +1,5 @@
 /**
- * 생성기 danger/structure → missionTags 매핑.
+ * 생성기 danger → missionTags 매핑.
  * 노드 challenge 배치 후보는 MISSION_TAG_NODE_CANDIDATES 참고.
  */
 import type { NodePolarity, NodeRole, Tier } from "./types";
@@ -11,12 +11,6 @@ export const DANGER_KEYWORD_TO_MISSION_TAGS: Record<string, string[]> = {
   고압: ["tag_threat_electric"],
   검문: ["tag_challenge_gear_detection"],
   스캔: ["tag_challenge_gear_detection"],
-};
-
-export const STRUCTURE_KEYWORD_TO_MISSION_TAGS: Record<string, string[]> = {
-  "파이프 (Pipe)": ["tag_threat_electric", "tag_context_industrial"],
-  파이프: ["tag_threat_electric", "tag_context_industrial"],
-  라인: ["tag_threat_electric"],
 };
 
 /** danger 텍스트(문자열·배열)에서 missionTags dedupe 추출 */

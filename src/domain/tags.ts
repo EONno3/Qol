@@ -1,7 +1,6 @@
-import type { Mercenary, MissionTypeKey, Tier, TagJudgmentAxis } from "../data/types";
+import type { Mercenary, Tier, TagJudgmentAxis } from "../data/types";
 import { GAME_CONFIG } from "../data/config";
 import { TAG_MISSION_INTERPRETATIONS } from "../data/tagMissionInterpretations";
-import { TAG_DEFINITIONS } from "../data/tagDefinitions";
 import { resolveTagId } from "../data/tagRegistry";
 import { findInterpretations } from "./tagInterpretationMatch";
 import type { DispatchLoadoutContext } from "./gearStatBonus";
@@ -112,8 +111,4 @@ export function mercTriggersJokerForMissionType(
     if (rules.length > 0) return true;
   }
   return false;
-}
-
-export function listAllTagDefs() {
-  return TAG_DEFINITIONS;
 }

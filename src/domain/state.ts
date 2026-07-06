@@ -1,15 +1,12 @@
 import { missions, generatedMissions, qaMissions } from "../data/seed";
 import { GAME_CONFIG } from "../data/config";
 import type {
-  ActiveDispatch,
-  CompletedDispatch,
   FixerOrigin,
   FixerProfile,
   GameState,
   MissionTypeKey,
   PlayerBehavioralStats,
   StationState,
-  ResultReport,
 } from "../data/types";
 
 export type { GameState };

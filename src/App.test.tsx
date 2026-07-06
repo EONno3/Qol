@@ -127,8 +127,8 @@ describe("App 1턴 루프", () => {
     // 5. 두 번째 미션 매칭 창으로 들어가서 차단기 용병 상태 검증
     fireEvent.click(screen.getByText("클럽 엘 네온 VIP 백도어 탈취"));
     // 용병 목록 Roster 내에서만 차단기 행을 확보하여 검증
-    const roster = screen.getByText("용병 목록").closest(".matching-bottom")!;
-    const busyMercRow = within(roster).getByText("차단기").closest(".merc-row")!;
+    const roster = screen.getByText("용병 목록").closest(".matching-bottom") as HTMLElement;
+    const busyMercRow = within(roster).getByText("차단기").closest(".merc-row") as HTMLElement;
     expect(within(busyMercRow).getByText(/작전 중/)).toBeInTheDocument();
 
     // 6. 다시 파견 관제소로 이동
@@ -148,8 +148,8 @@ describe("App 1턴 루프", () => {
     // 9. 이제 최종 종결되었으므로 다시 매칭 화면으로 가서 차단기 용병 상태가 풀렸는지 검증
     fireEvent.click(screen.getByRole("button", { name: /수주 미션/ }));
     fireEvent.click(screen.getByText("클럽 엘 네온 VIP 백도어 탈취"));
-    const rosterAfter = screen.getByText("용병 목록").closest(".matching-bottom")!;
-    const freeMercRow = within(rosterAfter).getByText("차단기").closest(".merc-row")!;
+    const rosterAfter = screen.getByText("용병 목록").closest(".matching-bottom") as HTMLElement;
+    const freeMercRow = within(rosterAfter).getByText("차단기").closest(".merc-row") as HTMLElement;
     // "작전 중" 표시가 없어야 함 (해제됨)
     expect(within(freeMercRow).queryByText(/작전 중/)).toBeNull();
 

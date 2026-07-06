@@ -8,7 +8,6 @@ import type {
   ResultReport,
   ResultType,
   RoutingDecision,
-  StatKey,
   StatusChange,
 } from "../data/types";
 import { GAME_CONFIG } from "../data/config";

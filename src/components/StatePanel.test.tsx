@@ -1,7 +1,7 @@
 import { render, screen, fireEvent } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 import { StatePanel } from "./StatePanel";
-import { createMockGameState, createMockPlayerStats } from "../test/factories";
+import { createMockGameState } from "../test/factories";
 
 describe("StatePanel 컴포넌트 단위 테스트", () => {
   it("case 1: 현재 크레딧이 잔고에 올바르게 렌더링된다", () => {

@@ -1,9 +1,0 @@
-{
-  "temperature": 0.35,
-  "repeat_penalty": 1.15,
-  "max_tokens": 700,
-  "top_p": 0.9,
-  "elapsed_sec": 2.8,
-  "char_count": 262,
-  "http_status": 200
-}

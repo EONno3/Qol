@@ -31,7 +31,3 @@ export const ENTITY_TAG_LINKS: EntityTagLink[] = [
   { entityType: "implant", entityId: "implant_arm_shotgun_01", tagId: "tag_implant_high_output_shotgun_arm", visibilityPhase: 2, noteKo: "고출력 산탄 암." },
   { entityType: "implant", entityId: "implant_arm_shotgun_01", tagId: "tag_gear_weapon_visible", visibilityPhase: 2, noteKo: "내장 무기도 검문 시 노출 리스크." },
 ];
-
-export function getEntityTagLinks(entityType: EntityTagLink["entityType"], entityId: string): EntityTagLink[] {
-  return ENTITY_TAG_LINKS.filter((l) => l.entityType === entityType && l.entityId === entityId);
-}
