@@ -1,0 +1,4 @@
+report_id,hook_id,display_name_ko,hook_summary_ko,is_mvp_followup
+report_mission_lower_fuse_capacitor_01_merc_breaker_01_success,hook_lower_fuse_power_ledger_01,더 퓨즈 전력 장부,캐패시터 회수 과정에서 전력 배분 장부 단서가 남는다.,true
+report_mission_mid_elneon_backdoor_01_merc_malt_01_partial_success,hook_malt_debt_ledger_01,몰트 채무 장부,라 나다 장부에 남은 몰트의 예전 빚이 후속 압박으로 이어진다.,true
+report_mission_mid_elneon_backdoor_01_merc_chromeshow_01_failure,hook_lanada_bounty_chromeshow_01,라 나다 크롬쇼 현상금,클럽 진입 실패 이후 라 나다가 크롬쇼를 표적으로 올린다.,true

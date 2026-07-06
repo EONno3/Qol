@@ -1,0 +1,7 @@
+mission_id,stat_key,priority_order,note_ko
+mission_lower_fuse_capacitor_01,frame,1,초고압 전력 케이블 방전 지대와 물리 작업을 버티는 핵심 스탯.
+mission_lower_fuse_capacitor_01,wire,2,변압기 격실 해체와 전력 설비 조작을 처리하는 핵심 스탯.
+mission_mid_elneon_backdoor_01,cypher,1,검문 스캐너와 복제 검사를 우회하는 핵심 스탯.
+mission_mid_elneon_backdoor_01,cool,2,클럽 내부 검문과 대인 상황을 흔들림 없이 넘기는 핵심 스탯.
+mission_upper_almadinat_memory_01,cool,1,상층 연회장과 시선 검사를 견디는 핵심 스탯.
+mission_upper_almadinat_memory_01,cypher,2,바이오메트릭 감시망과 전뇌 말소 절차를 처리하는 핵심 스탯.

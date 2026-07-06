@@ -1,0 +1,10 @@
+mission_id,stat_key,recommended_value,requirement_type,note_ko
+mission_lower_fuse_capacitor_01,frame,50,recommended,프레임 50 이상이면 방전 지대와 물리 해체 대응이 안정된다.
+mission_lower_fuse_capacitor_01,wire,45,recommended,와이어 45 이상이면 전력 설비 조작 대응이 안정된다.
+mission_lower_fuse_capacitor_01,cypher,35,bonus,전력 분배 제어판을 원격 해킹해 감전 위협을 사전 소멸할 수 있다.
+mission_mid_elneon_backdoor_01,cypher,50,recommended,사이퍼 50 이상이면 검문과 복제 검사를 안정적으로 우회한다.
+mission_mid_elneon_backdoor_01,cool,45,recommended,쿨 45 이상이면 유흥가 현장과 대인 압박을 버틴다.
+mission_mid_elneon_backdoor_01,pulse,35,bonus,VIP 홀 가상 베팅 서버의 잔여 거래 데이터를 회수할 수 있다.
+mission_upper_almadinat_memory_01,cool,60,recommended,쿨 60 이상이면 상층 사교 연회와 철수 압박을 버틴다.
+mission_upper_almadinat_memory_01,cypher,55,recommended,사이퍼 55 이상이면 바이오메트릭 감시와 전뇌 말소 절차를 처리한다.
+mission_upper_almadinat_memory_01,pulse,50,bonus,타겟 침실 내부 오프라인 스토리지의 금융 지분 데이터를 추출할 수 있다.

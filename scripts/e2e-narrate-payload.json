@@ -1,0 +1,108 @@
+{
+  "missionName": "더 퓨즈 제3변전소 고압 캐패시터 적출",
+  "mercName": "차단기",
+  "mercId": "merc_breaker_01",
+  "resultType": "success",
+  "summaryLogKo": "작전 목표를 달성하고 깔끔하게 현장을 빠져나왔다. (피로도 +20)",
+  "nodeLogs": [
+    "[작전 개시] 하층 구역 진입 준비 완료.",
+    "[진입 통과] 작전 구역 진입",
+    "[관문 통과] 중간 관문 1",
+    "[목표 통과] 핵심 목표 수행",
+    "[이탈 통과] 현장 이탈"
+  ],
+  "triggeredTags": [
+    {
+      "tagId": "tag_gear_insulated_work_habit",
+      "sourceType": "gear",
+      "sourceId": "gear_feet_insulated_boots_01",
+      "ruleId": "node_insulated_vs_electric",
+      "reading": "positive",
+      "sourceDisplayNameKo": "러버세인트 절연 부츠",
+      "contributionKo": "러버세인트 절연 부츠가 전기 위협 관문 통과에 기여했다"
+    },
+    {
+      "tagId": "tag_origin_slum_native",
+      "sourceType": "mercenary",
+      "sourceId": "merc_breaker_01",
+      "ruleId": "pool_wastewater_slum_native",
+      "reading": "positive",
+      "sourceDisplayNameKo": "차단기",
+      "contributionKo": "차단기이(가) 폐수 구간 통과에 기여했다"
+    }
+  ],
+  "nodeResolutions": [
+    {
+      "nodeInstanceId": "node_0_1",
+      "nameKo": "작전 구역 진입",
+      "role": "entry",
+      "roleLabelKo": "진입",
+      "outcome": "pass",
+      "passChance": 98,
+      "tagPassChanceDelta": 0,
+      "challengeTags": [
+        "tag_context_lower_damp"
+      ],
+      "triggeredTags": []
+    },
+    {
+      "nodeInstanceId": "node_1_2",
+      "nameKo": "중간 관문 1",
+      "role": "obstacle",
+      "roleLabelKo": "관문",
+      "outcome": "pass",
+      "passChance": 98,
+      "tagPassChanceDelta": 0,
+      "challengeTags": [
+        "tag_context_lower_damp"
+      ],
+      "triggeredTags": []
+    },
+    {
+      "nodeInstanceId": "node_2_3",
+      "nameKo": "핵심 목표 수행",
+      "role": "objective",
+      "roleLabelKo": "목표",
+      "outcome": "pass",
+      "passChance": 98,
+      "tagPassChanceDelta": 6,
+      "challengeTags": [
+        "tag_threat_electric"
+      ],
+      "triggeredTags": [
+        {
+          "tagId": "tag_gear_insulated_work_habit",
+          "sourceType": "gear",
+          "sourceId": "gear_feet_insulated_boots_01",
+          "ruleId": "node_insulated_vs_electric",
+          "reading": "positive",
+          "sourceDisplayNameKo": "러버세인트 절연 부츠",
+          "contributionKo": "러버세인트 절연 부츠가 전기 위협 관문 통과에 기여했다"
+        }
+      ]
+    },
+    {
+      "nodeInstanceId": "node_3_4",
+      "nameKo": "현장 이탈",
+      "role": "exit",
+      "roleLabelKo": "이탈",
+      "outcome": "pass",
+      "passChance": 98,
+      "tagPassChanceDelta": 18,
+      "challengeTags": [
+        "tag_context_lower_wastewater"
+      ],
+      "triggeredTags": [
+        {
+          "tagId": "tag_origin_slum_native",
+          "sourceType": "mercenary",
+          "sourceId": "merc_breaker_01",
+          "ruleId": "pool_wastewater_slum_native",
+          "reading": "positive",
+          "sourceDisplayNameKo": "차단기",
+          "contributionKo": "차단기이(가) 폐수 구간 통과에 기여했다"
+        }
+      ]
+    }
+  ]
+}

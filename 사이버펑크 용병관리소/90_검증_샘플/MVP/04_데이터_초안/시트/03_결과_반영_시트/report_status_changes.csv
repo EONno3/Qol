@@ -1,0 +1,6 @@
+report_id,status_id,change_type,note_ko
+report_mission_lower_fuse_capacitor_01_merc_breaker_01_success,status_gear_insulated_boots_worn_light,add,절연 부츠가 고전압 환경에서 경미하게 마모됨.
+report_mission_mid_elneon_backdoor_01_merc_malt_01_partial_success,status_fatigue_sleep_debt_deep,worsen,기존 수면부족이 장시간 잠입 이후 심화됨.
+report_mission_mid_elneon_backdoor_01_merc_malt_01_partial_success,status_gear_auth_bypass_overheat,add,인증 우회기가 반복 사용으로 과열 흔적을 남김.
+report_mission_mid_elneon_backdoor_01_merc_chromeshow_01_failure,status_gear_shoulder_armor_crack_worse,worsen,기존 어깨 장갑판 균열이 실패한 교전으로 악화됨.
+report_mission_mid_elneon_backdoor_01_merc_chromeshow_01_failure,status_injury_bullet_puncture,add,진입 실패 후 총격 과정에서 탄환 관통흔 발생.

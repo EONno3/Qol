@@ -1,0 +1,4 @@
+mission_id,gear_id,is_hard_required,note_ko
+mission_lower_fuse_capacitor_01,gear_feet_insulated_boots_01,true,고전압 환경 진입을 위한 필수 절연 장비.
+mission_upper_almadinat_memory_01,gear_lung_high_altitude_regulator_01,true,상층 고고도 환경에서 호흡과 기압을 버티기 위한 필수 장비.
+mission_upper_almadinat_memory_01,gear_skin_dna_patch_01,true,바이오메트릭 검문을 통과하기 위한 필수 위장 장비.

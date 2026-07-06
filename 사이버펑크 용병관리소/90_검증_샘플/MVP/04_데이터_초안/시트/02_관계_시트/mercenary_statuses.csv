@@ -1,0 +1,6 @@
+merc_id,status_id,status_source,note_ko
+merc_breaker_01,status_neural_electric_afterimage,preexisting,과거 감전 사고 이후 남은 신경계 잔향.
+merc_malt_01,status_fatigue_sleep_debt,preexisting,중층 유흥가 생활에서 누적된 수면 부족.
+merc_velvet_knife_01,status_med_sleep_aid,preexisting,수면 보조제 복용으로 반응 지연 가능성이 있다.
+merc_chromeshow_01,status_gear_shoulder_armor_crack,preexisting,노출형 상체 장갑판에 기존 균열이 있다.
+merc_chromeshow_01,status_mental_overaroused,preexisting,명령 대기와 은밀한 접근에 불리한 과각성 상태.

@@ -1,0 +1,4 @@
+report_id,implant_id,update_type,repair_cost,note_ko
+report_mission_lower_fuse_capacitor_01_merc_breaker_01_success,implant_wrist_torque_joint_01,worn,1500,고전압 작업 이후 손목 토크 보조 관절 정비 필요.
+report_mission_mid_elneon_backdoor_01_merc_chromeshow_01_failure,implant_arm_shotgun_01,damaged,6500,진입 실패 후 교전 과정에서 산탄 암 손상 위험 발생.
+report_mission_mid_elneon_backdoor_01_merc_chromeshow_01_failure,implant_torso_exposed_armor_01,damaged,4200,노출형 상체 장갑판 균열 악화와 연결.

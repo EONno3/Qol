@@ -1,0 +1,8 @@
+threat_id,mission_id,display_name_ko,stat_key,target_value,threat_summary_ko
+lower_fuse_high_voltage_cable,mission_lower_fuse_capacitor_01,초고압 전력 케이블 방전 지대,frame,50,신체 안정성과 절연 장비 운용이 부족하면 감전 리스크가 커진다.
+lower_fuse_capacitor_disassembly,mission_lower_fuse_capacitor_01,변압기 격실 물리 해체,wire,45,전력 설비 구조를 읽고 해체 순서를 처리해야 한다.
+mid_elneon_biometric_gate,mission_mid_elneon_backdoor_01,바이오메트릭 인식 검색 게이트,cypher,40,검문 장비를 속이지 못하면 클럽 내부 진입이 막힌다.
+mid_elneon_vip_guard_clone_check,mission_mid_elneon_backdoor_01,VIP 가드 무단 복제 검사,cypher,50,VIP 구역 진입 전 복제 검사와 인증 절차를 우회해야 한다.
+upper_almadinat_biometric_net,mission_upper_almadinat_memory_01,실시간 바이오메트릭 감시망,cypher,50,상층 감시망이 신체 정보와 위장 흔적을 실시간 대조한다.
+upper_almadinat_masked_gala,mission_upper_almadinat_memory_01,가면 무도회 사교 연회장,cool,55,시선 검사와 격식 있는 대화를 오래 버텨야 한다.
+upper_almadinat_drone_escape,mission_upper_almadinat_memory_01,요격 드론 감시 활강 철수,cool,60,철수 과정에서 드론 감시와 압박 상황을 흔들림 없이 넘겨야 한다.

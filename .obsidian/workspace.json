@@ -1,0 +1,232 @@
+{
+  "main": {
+    "id": "e0ef035d2ca19ae7",
+    "type": "split",
+    "children": [
+      {
+        "id": "4d97bb04b3c87de5",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "f5cfe0d5c0d59213",
+            "type": "leaf",
+            "state": {
+              "type": "empty",
+              "state": {},
+              "icon": "lucide-file",
+              "title": "새 탭"
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "vertical"
+  },
+  "left": {
+    "id": "52226b73a546f69d",
+    "type": "split",
+    "children": [
+      {
+        "id": "b6a3a3b356d71577",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "77ba6669fba2604b",
+            "type": "leaf",
+            "state": {
+              "type": "file-explorer",
+              "state": {
+                "sortOrder": "alphabetical",
+                "autoReveal": false
+              },
+              "icon": "lucide-folder-closed",
+              "title": "파일 탐색기"
+            }
+          },
+          {
+            "id": "07580264e4146f8d",
+            "type": "leaf",
+            "state": {
+              "type": "search",
+              "state": {
+                "query": "",
+                "matchingCase": false,
+                "explainSearch": false,
+                "collapseAll": false,
+                "extraContext": false,
+                "sortOrder": "alphabetical"
+              },
+              "icon": "lucide-search",
+              "title": "검색"
+            }
+          },
+          {
+            "id": "577b5991c4a0f975",
+            "type": "leaf",
+            "state": {
+              "type": "bookmarks",
+              "state": {},
+              "icon": "lucide-bookmark",
+              "title": "북마크"
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "horizontal",
+    "width": 300
+  },
+  "right": {
+    "id": "1cfe8e7097fddbac",
+    "type": "split",
+    "children": [
+      {
+        "id": "53bfbe06532b481f",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "2d2be7bb94955e67",
+            "type": "leaf",
+            "state": {
+              "type": "backlink",
+              "state": {
+                "file": "사이버펑크 용병관리소/QA/MVP/mvp 1차 QA.md",
+                "collapseAll": false,
+                "extraContext": false,
+                "sortOrder": "alphabetical",
+                "showSearch": false,
+                "searchQuery": "",
+                "backlinkCollapsed": false,
+                "unlinkedCollapsed": true
+              },
+              "icon": "links-coming-in",
+              "title": "mvp 1차 QA 의 백링크"
+            }
+          },
+          {
+            "id": "b8155fe2d2474bfa",
+            "type": "leaf",
+            "state": {
+              "type": "outgoing-link",
+              "state": {
+                "file": "사이버펑크 용병관리소/QA/MVP/mvp 1차 QA.md",
+                "linksCollapsed": false,
+                "unlinkedCollapsed": true
+              },
+              "icon": "links-going-out",
+              "title": "mvp 1차 QA 의 나가는 링크"
+            }
+          },
+          {
+            "id": "5fb1a4f9d7ea3cd3",
+            "type": "leaf",
+            "state": {
+              "type": "tag",
+              "state": {
+                "sortOrder": "frequency",
+                "useHierarchy": true,
+                "showSearch": false,
+                "searchQuery": ""
+              },
+              "icon": "lucide-tags",
+              "title": "태그"
+            }
+          },
+          {
+            "id": "76e6b1264a0244ad",
+            "type": "leaf",
+            "state": {
+              "type": "all-properties",
+              "state": {
+                "sortOrder": "frequency",
+                "showSearch": false,
+                "searchQuery": ""
+              },
+              "icon": "lucide-archive",
+              "title": "모든 속성"
+            }
+          },
+          {
+            "id": "f6f13e87e2c31aea",
+            "type": "leaf",
+            "state": {
+              "type": "outline",
+              "state": {
+                "file": "사이버펑크 용병관리소/QA/MVP/mvp 1차 QA.md",
+                "followCursor": false,
+                "showSearch": false,
+                "searchQuery": ""
+              },
+              "icon": "lucide-list",
+              "title": "mvp 1차 QA 의 개요"
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "horizontal",
+    "width": 300,
+    "collapsed": true
+  },
+  "left-ribbon": {
+    "hiddenItems": {
+      "switcher:빠른 전환기 열기": false,
+      "graph:그래프 뷰 열기": false,
+      "canvas:새 캔버스 만들기": false,
+      "daily-notes:오늘의 일일 노트 열기": false,
+      "templates:템플릿 삽입": false,
+      "command-palette:명령어 팔레트 열기": false,
+      "bases:새 베이스 생성하기": false
+    }
+  },
+  "active": "f5cfe0d5c0d59213",
+  "lastOpenFiles": [
+    "사이버펑크 용병관리소/01_세계관/팩션/하층.md",
+    "AI 문제 2.md",
+    "무제",
+    "AI 문제 1.md",
+    "AI 문서 작성 브리핑.md",
+    "생성 문구 교정.md",
+    "사이버펑크 용병관리소/아이디어.md",
+    "사이버펑크 용병관리소/04_미션/브리핑 말투 예시.md",
+    "src/components/ResultReport.test.tsx",
+    "scripts/ai_pipeline/narrator_server.py",
+    "venv/Lib/site-packages/werkzeug-3.1.8.dist-info/licenses/LICENSE.txt",
+    "venv/Lib/site-packages/werkzeug-3.1.8.dist-info/RECORD",
+    "venv/Lib/site-packages/werkzeug-3.1.8.dist-info/WHEEL",
+    "venv/Lib/site-packages/werkzeug-3.1.8.dist-info/METADATA",
+    "venv/Lib/site-packages/werkzeug-3.1.8.dist-info/licenses",
+    "venv/Lib/site-packages/werkzeug-3.1.8.dist-info/INSTALLER",
+    "venv/Lib/site-packages/werkzeug-3.1.8.dist-info",
+    "venv/Lib/site-packages/werkzeug/debug/shared/more.png",
+    "venv/Lib/site-packages/werkzeug/debug/shared/less.png",
+    "venv/Lib/site-packages/werkzeug/debug/shared/ICON_LICENSE.md",
+    "venv/Lib/site-packages/werkzeug/debug/shared/console.png",
+    "사이버펑크 용병관리소/대화 로그/0616 pm7.md",
+    "사이버펑크 용병관리소/00_프로젝트_관리/코드_데이터_구조_온톨로지.md",
+    "GEMINI.md",
+    "사이버펑크 용병관리소/00_프로젝트_관리/ai_ontology_spec.md",
+    "사이버펑크 용병관리소/00_프로젝트_관리/static_data_spec.md",
+    "사이버펑크 용병관리소/00_프로젝트_관리/world_state_schema.md",
+    "사이버펑크 용병관리소/QA/MVP/mvp 1차 QA.md",
+    "venv/Lib/site-packages/numpy-2.4.4.dist-info/licenses/numpy/_core/src/npysort/x86-simd-sort/LICENSE.md",
+    "venv/Lib/site-packages/numpy-2.4.4.dist-info/licenses/numpy/random/src/splitmix64/LICENSE.md",
+    "venv/Lib/site-packages/numpy-2.4.4.dist-info/licenses/numpy/random/src/sfc64/LICENSE.md",
+    "venv/Lib/site-packages/numpy-2.4.4.dist-info/licenses/numpy/random/src/philox/LICENSE.md",
+    "venv/Lib/site-packages/numpy-2.4.4.dist-info/licenses/numpy/random/src/pcg64/LICENSE.md",
+    "venv/Lib/site-packages/numpy-2.4.4.dist-info/licenses/numpy/random/src/mt19937/LICENSE.md",
+    "venv/Lib/site-packages/numpy-2.4.4.dist-info/licenses/numpy/random/src/distributions/LICENSE.md",
+    "venv/Lib/site-packages/numpy-2.4.4.dist-info/licenses/numpy/fft/pocketfft/LICENSE.md",
+    "venv/Lib/site-packages/numpy-2.4.4.dist-info/licenses/numpy/random/LICENSE.md",
+    "venv/Lib/site-packages/librosa-0.11.0.dist-info/LICENSE.md",
+    "venv/Lib/site-packages/sklearn/externals/array_api_extra/README.md",
+    "venv/Lib/site-packages/sklearn/datasets/images/flower.jpg",
+    "venv/Lib/site-packages/sklearn/datasets/images/china.jpg",
+    "venv/Lib/site-packages/scipy/ndimage/tests/dots.png",
+    "venv/Lib/site-packages/networkx/drawing/tests/baseline/test_house_with_colors.png",
+    "venv/Lib/site-packages/networkx/drawing/tests/baseline/test_display_shortest_path.png",
+    "venv/Lib/site-packages/networkx/drawing/tests/baseline/test_display_labels_and_colors.png",
+    "venv/Lib/site-packages/networkx/drawing/tests/baseline/test_display_house_with_colors.png",
+    "무제.canvas"
+  ]
+}

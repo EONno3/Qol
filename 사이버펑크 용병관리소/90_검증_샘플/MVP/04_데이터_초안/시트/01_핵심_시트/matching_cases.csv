@@ -1,0 +1,5 @@
+match_id,mission_id,merc_id,deployment_verdict,success_outlook,loss_outlook,expected_result_type,summary_ko,is_mvp
+match_mission_lower_fuse_capacitor_01_merc_breaker_01,mission_lower_fuse_capacitor_01,merc_breaker_01,clear,high,low,success,"유리: 고압망 작업 습관, 산업 설비 경험. 불리: 보안 절차 무시 경향. 조건: 절연 장비 상태. 결과 확인: 절연 장비 내구도, 캐패시터 손상 여부.",true
+match_mission_mid_elneon_backdoor_01_merc_malt_01,mission_mid_elneon_backdoor_01,merc_malt_01,clear,high,medium,partial_success,"유리: 시민 위장, 스캐너 기만, 낮은 가시성. 불리: 채무 관계. 조건: 은닉형 슬롯 유지, 저가시성 무장 유지. 결과 확인: 검문 통과, 채무 단서 발생 여부, 우회기 과열 여부.",true
+match_mission_upper_almadinat_memory_01_merc_velvet_knife_01,mission_upper_almadinat_memory_01,merc_velvet_knife_01,clear,high,medium,success,"유리: 유전자 기만, 단정한 인상, 상층 예법. 불리: 반사면 지연 반응. 조건: 고도 보정기 완비, DNA 패치 완비. 결과 확인: 바이오게이트 통과, 반사면 리스크, 신원 삭제 비용.",true
+match_mission_mid_elneon_backdoor_01_merc_chromeshow_01,mission_mid_elneon_backdoor_01,merc_chromeshow_01,locked,low,high,failure,"유리: 교전 발생 시 생존력. 불리: 매우 높은 가시성, 낮은 Cypher/Cool, 노출형 크롬. 조건: 장비 대폭 해체 필요. 결과 확인: 진입 차단, 경보 폭증, 장비 파손, 라 나다 평판 손실.",true

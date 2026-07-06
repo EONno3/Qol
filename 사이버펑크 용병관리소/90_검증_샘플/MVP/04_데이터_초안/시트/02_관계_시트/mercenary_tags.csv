@@ -1,0 +1,19 @@
+merc_id,tag_id,tag_category,visibility_phase,note_ko
+merc_breaker_01,tag_operation_high_voltage_grid_tech,operation,phase_2,고압망 작업에 익숙한 운용 태그.
+merc_breaker_01,tag_origin_slum_native,origin,phase_2,하층 슬럼 환경에 익숙한 출신 태그.
+merc_breaker_01,tag_gear_insulated_work_habit,gear,phase_2,절연 장비 작업 습관 태그.
+merc_breaker_01,tag_condition_electric_afterimage,condition,phase_2,감전 잔향 상태 태그.
+merc_malt_01,tag_origin_nightlife_worker,origin,phase_2,중층 유흥가 노동자 출신 태그.
+merc_malt_01,tag_operation_civilian_disguise,operation,phase_2,민간인 위장 운용 태그.
+merc_malt_01,tag_gear_scanner_deception,gear,phase_2,스캐너 기만 장비 운용 태그.
+merc_malt_01,tag_gear_hidden_slot,gear,phase_2,은닉 슬롯 장비 태그.
+merc_malt_01,tag_condition_debt_shadow,condition,phase_2,채무 관계 리스크 태그.
+merc_velvet_knife_01,tag_origin_upper_etiquette,origin,phase_2,상층 예법 교육 출신 태그.
+merc_velvet_knife_01,tag_operation_gene_deception,operation,phase_2,유전자 기만 운용 태그.
+merc_velvet_knife_01,tag_appearance_clean_profile,appearance,phase_2,단정하고 노이즈가 적은 인상 태그.
+merc_velvet_knife_01,tag_condition_reflection_delay,condition,phase_2,반사면 앞 미세 반응 지연 태그.
+merc_chromeshow_01,tag_origin_illegal_arena,origin,phase_2,중층 불법 격투장 출신 태그.
+merc_chromeshow_01,tag_implant_showy_chrome,implant,phase_2,노출도가 높은 크롬 임플란트 태그.
+merc_chromeshow_01,tag_implant_high_output_shotgun_arm,implant,phase_2,고출력 산탄 암 임플란트 태그.
+merc_chromeshow_01,tag_condition_electric_sensitivity,condition,phase_2,감전 이후 신경계 과민 반응 태그.
+merc_chromeshow_01,tag_behavior_wait_order_disobedience,behavior,phase_2,대기 명령을 잘 지키지 않는 행동 태그.

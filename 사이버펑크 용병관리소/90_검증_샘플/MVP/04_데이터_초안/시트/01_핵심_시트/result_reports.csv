@@ -1,0 +1,4 @@
+report_id,mission_id,merc_id,result_type,reward_credits,extra_reward_credits,lost_credits,summary_log_ko,fulfilled_conditions_ko,missing_conditions_ko,joker_triggered,triggered_risk_nodes_ko,is_mvp
+report_mission_lower_fuse_capacitor_01_merc_breaker_01_success,mission_lower_fuse_capacitor_01,merc_breaker_01,success,16500,0,700,"캐패시터 유닛 회수 성공. 절연 부츠가 경미하게 마모되고 손목 보조 관절 정비 필요.","필수 절연 장비 보유; 프레임/와이어 기준 충족.","사이퍼 보너스 회로 다운 없음.",false,,true
+report_mission_mid_elneon_backdoor_01_merc_malt_01_partial_success,mission_mid_elneon_backdoor_01,merc_malt_01,partial_success,24000,0,4200,"백도어 코어 세트 회수. 검문은 통과했지만 우회기 과열과 채무 단서가 남음.","낮은 가시성 유지; 시민 위장; 스캐너 기만.","VIP 홀 잔여 거래 데이터 회수 실패.",false,,true
+report_mission_mid_elneon_backdoor_01_merc_chromeshow_01_failure,mission_mid_elneon_backdoor_01,merc_chromeshow_01,failure,0,0,6500,"높은 가시성과 노출형 크롬 때문에 진입 단계에서 경보가 폭증. 장비 파손과 평판 손실 발생.","교전 발생 시 생존력은 일부 확인.","암호 칩 회수 실패; 거래 데이터 회수 실패.",false,"진입 차단; 경보 폭증; 장비 파손",true

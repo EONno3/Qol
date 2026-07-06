@@ -1,0 +1,8 @@
+merc_id,gear_id,equip_state,note_ko
+merc_breaker_01,gear_feet_insulated_boots_01,equipped,고전압 작업 계약의 핵심 장비.
+merc_malt_01,gear_wrist_auth_bypass_bracelet_01,equipped,근거리 인증 우회와 검문 통과에 사용하는 장비.
+merc_malt_01,gear_body_hidden_slot_01,equipped,클럽 검문에서 소형 장비를 숨기는 장비.
+merc_malt_01,gear_weapon_fold_pistol_01,equipped,낮은 가시성을 유지하기 위한 소형 무장.
+merc_velvet_knife_01,gear_skin_dna_patch_01,equipped,상층 바이오 위장을 위한 필수 장비.
+merc_velvet_knife_01,gear_lung_high_altitude_regulator_01,equipped,상층 고고도 환경 대응 장비.
+merc_velvet_knife_01,gear_weapon_ceramic_knife_01,equipped,금속 탐지 리스크를 낮춘 근접 무장.

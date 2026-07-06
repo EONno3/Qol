@@ -1,0 +1,6 @@
+report_id,faction_id,reputation_delta,note_ko
+report_mission_lower_fuse_capacitor_01_merc_breaker_01_success,faction_lower_fuse,5,하층 더 퓨즈 의뢰 성공으로 현지 평판 상승.
+report_mission_mid_elneon_backdoor_01_merc_malt_01_partial_success,faction_fixer_network,3,백도어 코어 회수로 픽서 네트워크 평판 상승.
+report_mission_mid_elneon_backdoor_01_merc_malt_01_partial_success,faction_mid_lanada,-3,라 나다 장부와 채무 단서가 남아 현지 평판 하락.
+report_mission_mid_elneon_backdoor_01_merc_chromeshow_01_failure,faction_mid_lanada,-6,클럽 진입 실패와 경보 폭증으로 라 나다 평판 크게 하락.
+report_mission_mid_elneon_backdoor_01_merc_chromeshow_01_failure,faction_fixer_network,-2,의뢰 실패로 픽서 네트워크 신뢰 하락.

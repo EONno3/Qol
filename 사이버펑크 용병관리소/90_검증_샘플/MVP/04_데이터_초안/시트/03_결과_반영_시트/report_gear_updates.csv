@@ -1,0 +1,3 @@
+report_id,gear_id,update_type,repair_cost,note_ko
+report_mission_lower_fuse_capacitor_01_merc_breaker_01_success,gear_feet_insulated_boots_01,worn,700,절연 부츠 경미 마모. 정산 손실 700 크레딧과 연결.
+report_mission_mid_elneon_backdoor_01_merc_malt_01_partial_success,gear_wrist_auth_bypass_bracelet_01,overheated,1200,인증 우회기 과열 흔적. 다음 검문 우회 안정성 저하.

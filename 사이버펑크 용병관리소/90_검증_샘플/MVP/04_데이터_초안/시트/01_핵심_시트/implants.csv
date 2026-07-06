@@ -1,0 +1,7 @@
+implant_id,display_name_ko,function_name_ko,body_part,implant_type,visibility_value,condition_state,effect_summary_ko,malfunction_risk_ko,repair_cost,insurance_group,is_mvp
+implant_wrist_torque_joint_01,핸드토크 구형 보조 관절,구형 손목 토크 보조 관절,wrist,assist,low,normal,무거운 장비 조작과 산업 설비 해체를 보조한다.,고전압 작업 후 단락 충격 위험.,1500,,true
+implant_face_expression_stabilizer_01,마이크로페이스 표정 안정기,표정 근육 안정기,face,stabilizer,very_low,normal,상층 사교 공간에서 표정 노이즈를 줄인다.,반사면 앞에서 미세 반응 지연 가능.,2200,,true
+implant_skin_patch_port_01,더마포트 인공 피부 패치 포트,인공 피부 패치 포트,skin,interface,very_low,normal,DNA 스킨 패치와 연동해 바이오 위장을 안정화한다.,패치 손상 시 신원 노출 위험.,3000,,true
+implant_arm_shotgun_01,붐암 고출력 산탄 암,고출력 산탄 암,arm,weapon,very_high,normal,정면 교전에서 높은 제압력을 제공한다.,검문과 잠입 임무에서 즉시 노출될 위험.,6500,,true
+implant_torso_exposed_armor_01,쇼플레이트 노출형 상체 장갑판,노출형 상체 장갑판,torso,armor,very_high,damaged,총격 생존력을 높이지만 외형 노출도가 높다.,균열 악화 시 방어 성능 저하.,4200,,true
+implant_torso_shoulder_frame_01,숄더잭 강화 어깨 프레임,강화 어깨 프레임,torso,frame,high,normal,중량과 반동을 버티는 상체 프레임 보강.,고전압 충격에 신경계 과민 반응 가능.,2800,,true

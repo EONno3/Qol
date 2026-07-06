@@ -1,0 +1,8 @@
+gear_id,display_name_ko,function_name_ko,gear_slot,gear_type,usage_type,visibility_value,is_required_gear,condition_state,durability_state,effect_summary_ko,repair_cost,insurance_group,is_mvp
+gear_feet_insulated_boots_01,러버세인트 절연 부츠,산업용 절연 안전화,feet,safety,fixed,,true,normal,normal,고전압 환경에서 감전 위험을 줄이는 필수 작업 장비.,700,,true
+gear_wrist_auth_bypass_bracelet_01,글래스리스트 인증 팔찌,손목형 근거리 인증 우회기,wrist,bypass,fixed,,false,normal,normal,근거리 인증 장치를 속여 출입 검문을 넘기는 장비.,1200,,true
+gear_skin_dna_patch_01,세컨드페이스 DNA 스킨 패치,인공 DNA 유전자 스킨 패치,skin,disguise,semi_consumable,,true,normal,normal,바이오메트릭 검문에서 임시 유전자 위장을 제공한다.,0,,true
+gear_lung_high_altitude_regulator_01,헤븐프레셔 고도 보정기,상층 고고도 기압 보정기,lung,survival,fixed,,true,normal,normal,상층 고고도 환경의 기압 변화와 호흡 부담을 보정한다.,1800,,true
+gear_body_hidden_slot_01,로우시그 은닉 슬롯,은닉형 보관 슬롯,body,storage,fixed,,false,normal,normal,검색 게이트를 통과할 때 소형 물품과 무장을 숨기는 장비.,900,,true
+gear_weapon_fold_pistol_01,슬림폴드 권총,소형 접이식 권총,weapon,weapon,fixed,,false,normal,normal,낮은 가시성을 유지하기 쉬운 소형 무장.,600,,true
+gear_weapon_ceramic_knife_01,무음 세라믹 단검,세라믹 단검,weapon,weapon,fixed,,false,normal,normal,금속 탐지 리스크를 낮춘 근접 무장.,400,,true

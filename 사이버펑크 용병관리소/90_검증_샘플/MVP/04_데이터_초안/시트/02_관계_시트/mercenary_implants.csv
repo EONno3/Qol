@@ -1,0 +1,7 @@
+merc_id,implant_id,condition_state,note_ko
+merc_breaker_01,implant_wrist_torque_joint_01,normal,산업 설비 해체와 물리 작업을 보조하는 구형 손목 관절.
+merc_velvet_knife_01,implant_face_expression_stabilizer_01,normal,상층 사교 공간에서 표정 노이즈를 줄이는 임플란트.
+merc_velvet_knife_01,implant_skin_patch_port_01,normal,DNA 스킨 패치와 연동되는 인공 피부 포트.
+merc_chromeshow_01,implant_arm_shotgun_01,normal,정면 교전용 고출력 산탄 암.
+merc_chromeshow_01,implant_torso_exposed_armor_01,damaged,노출도가 높고 기존 균열이 있는 상체 장갑판.
+merc_chromeshow_01,implant_torso_shoulder_frame_01,normal,중량과 반동을 버티는 강화 어깨 프레임.

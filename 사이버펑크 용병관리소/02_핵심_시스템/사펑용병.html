@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>용병 파견 UI 멀티 테마</title>
+    
+    <!-- 1. Tailwind CSS (스타일링) -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- 2. React & ReactDOM -->
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    
+    <!-- 3. Babel (브라우저에서 JSX 코드를 읽을 수 있게 변환) -->
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    
+    <!-- 4. FontAwesome (아이콘 렌더링용) -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body class="bg-gray-900">
+    <!-- 리액트 앱이 그려질 위치 -->
+    <div id="root"></div>
+
+    <!-- 리액트 코드 시작 -->
+    <script type="text/babel">
+        const { useState } = React;
+
+        // --- HTML용 폰트어썸 아이콘 래퍼 컴포넌트 ---
+        const Icon = ({ name, size = 16, className = '' }) => {
+            const iconMap = {
+                'Map': 'fa-solid fa-map-location-dot',
+                'DollarSign': 'fa-solid fa-dollar-sign',
+                'Users': 'fa-solid fa-users',
+                'AlertTriangle': 'fa-solid fa-triangle-exclamation',
+                'Crosshair': 'fa-solid fa-crosshairs',
+                'ArrowRight': 'fa-solid fa-arrow-right',
+                'Zap': 'fa-solid fa-bolt',
+                'Shield': 'fa-solid fa-shield-halved',
+                'Activity': 'fa-solid fa-heart-pulse',
+                'Beer': 'fa-solid fa-beer-mug-empty'
+            };
+            return <i className={`${iconMap[name]} ${className}`} style={{ fontSize: `${size}px` }}></i>;
+        };
+
+        // --- 모크업 데이터 ---
+        const mockMissions = [
+          { id: 1, name: "섹터 7 데이터 추출", reward: 5000, time: "02:30", zone: "네온 지구" },
+          { id: 2, name: "VIP 밀반출 호위", reward: 8500, time: "05:00", zone: "기업 지구" },
+          { id: 3, name: "불법 임플란트 회수", reward: 3200, time: "01:15", zone: "슬럼가" },
+        ];
+
+        const mockMercs = [
+          { id: 1, name: "잭스 (Jax)", rank: "S", type: "전투", satisfaction: 85, status: "대기중" },
+          { id: 2, name: "노바 (Nova)", rank: "A", type: "해킹", satisfaction: 42, status: "불만" },
+        ];
+
+        // --- 3가지 테마 정의 ---
+        const themes = {
+          cyberpunk: {
+            name: "사이버펑크 (어둠/네온)",
+            bg: "bg-slate-950",
+            textMain: "text-cyan-400",
+            textMuted: "text-cyan-700",
+            textHighlight: "text-pink-500",
+            panelBg: "bg-slate-900",
+            panelBorder: "border border-cyan-500/50 shadow-[0_0_15px_rgba(6,182,212,0.15)]",
+            cardBg: "bg-slate-950/50",
+            cardBorder: "border border-cyan-900",
+            buttonPrimary: "bg-pink-600 hover:bg-pink-500 text-white shadow-[0_0_10px_rgba(219,39,119,0.5)]",
+            buttonSecondary: "bg-slate-800 hover:bg-slate-700 text-cyan-400 border border-cyan-800",
+            font: "font-sans",
+            sliderBase: "bg-slate-800",
+            sliderFill: "bg-cyan-500",
+            progressBg: "bg-slate-800",
+            progressFill: "bg-pink-500",
+            radius: "rounded-none",
+            sliderBaseColor: "#1e293b",
+            sliderFillColor: "#ec4899",
+            sliderThumb: "[&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-5 [&::-webkit-slider-thumb]:h-5 [&::-webkit-slider-thumb]:bg-pink-500 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:shadow-[0_0_10px_rgba(219,39,119,0.8)]",
+          },
+          lcd: {
+            name: "구형 LCD (계산기/피처폰)",
+            bg: "bg-[#6c7a59]", 
+            textMain: "text-[#11190b] font-bold",
+            textMuted: "text-[#3b472e] font-semibold",
+            textHighlight: "text-[#11190b] font-black underline",
+            panelBg: "bg-[#9baf84]", 
+            panelBorder: "border-8 border-[#3b472e] shadow-[inset_0_0_20px_rgba(0,0,0,0.15)] rounded-lg",
+            cardBg: "bg-[#9baf84]",
+            cardBorder: "border-2 border-[#11190b] rounded-none",
+            buttonPrimary: "bg-[#11190b] hover:bg-[#3b472e] text-[#9baf84] border-2 border-[#11190b] uppercase font-black",
+            buttonSecondary: "bg-transparent hover:bg-[#11190b]/10 text-[#11190b] border-2 border-[#11190b] uppercase font-bold",
+            font: "font-mono",
+            sliderBase: "bg-[#9baf84] border-2 border-[#11190b]",
+            sliderFill: "bg-[#11190b]",
+            progressBg: "bg-[#9baf84] border-2 border-[#11190b] p-[1px]", // 패딩을 살짝 줄여서 내부 공간 확보
+            progressFill: "bg-[#11190b]",
+            radius: "rounded-none",
+            sliderBaseColor: "#9baf84",
+            sliderFillColor: "#11190b",
+            sliderThumb: "[&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-4 [&::-webkit-slider-thumb]:h-5 [&::-webkit-slider-thumb]:bg-[#11190b] [&::-webkit-slider-thumb]:rounded-none",
+          },
+          terminal: {
+            name: "레트로 터미널 (해커/클래식)",
+            bg: "bg-black",
+            textMain: "text-green-500",
+            textMuted: "text-green-800",
+            textHighlight: "text-green-400",
+            panelBg: "bg-black",
+            panelBorder: "border-2 border-green-500 shadow-[0_0_5px_rgba(34,197,94,0.3)]",
+            cardBg: "bg-black",
+            cardBorder: "border border-green-800 border-dashed",
+            buttonPrimary: "bg-green-900/50 hover:bg-green-800 text-green-400 border border-green-500",
+            buttonSecondary: "bg-black hover:bg-green-900/30 text-green-600 border border-green-800",
+            font: "font-mono uppercase tracking-wider",
+            sliderBase: "bg-green-950 border border-green-800",
+            sliderFill: "bg-green-500",
+            progressBg: "bg-black border border-green-800",
+            progressFill: "bg-green-500",
+            radius: "rounded-none",
+            sliderBaseColor: "#052e16",
+            sliderFillColor: "#22c55e",
+            sliderThumb: "[&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-3 [&::-webkit-slider-thumb]:h-5 [&::-webkit-slider-thumb]:bg-green-500 [&::-webkit-slider-thumb]:rounded-none",
+          }
+        };
+
+        // --- 개별 대시보드 컴포넌트 ---
+        const Dashboard = ({ theme }) => {
+          const [ratio, setRatio] = useState(60); // 용병 몫 비율
+
+          // 슬라이더 채우기 비율 보정 (min 10, max 90 기준 실제 물리적 퍼센트 계산)
+          const fillPercent = ((ratio - 10) / (90 - 10)) * 100;
+
+          return (
+            <div className={`p-6 w-full ${theme.bg} ${theme.font} transition-all duration-300`}>
+              <div className="max-w-6xl mx-auto mb-4 flex justify-between items-end">
+                <div>
+                  <h2 className={`text-sm ${theme.textMuted} mb-1`}>UI Style Preview</h2>
+                  <h1 className={`text-2xl font-bold ${theme.textMain}`}>{theme.name}</h1>
+                </div>
+              </div>
+
+              <div className={`max-w-6xl mx-auto p-6 ${theme.panelBg} ${theme.panelBorder} ${theme.radius}`}>
+                {/* 헤더 부분 */}
+                <div className={`flex justify-between items-center pb-4 mb-6 border-b ${theme.cardBorder}`}>
+                  <div className="flex items-center gap-3">
+                    <Icon name="Map" size={24} className={theme.textHighlight} />
+                    <div>
+                      <div className={`text-sm ${theme.textMuted}`}>현재 진영 / 구역</div>
+                      <div className={`text-lg font-bold ${theme.textMain}`}>섹터 4 : 상업 지구</div>
+                    </div>
+                  </div>
+                  <div className="flex gap-6">
+                    <div className="text-right">
+                      <div className={`text-sm ${theme.textMuted}`}>보유 자금</div>
+                      <div className={`text-xl font-bold flex items-center justify-end gap-1 ${theme.textMain}`}>
+                        <Icon name="DollarSign" size={18} className={theme.textHighlight} /> 245,000
+                      </div>
+                    </div>
+                    <button className={`px-4 py-2 flex items-center gap-2 font-bold ${theme.buttonSecondary} ${theme.radius}`}>
+                      <Icon name="Users" size={16} /> 용병 뽑기
+                    </button>
+                  </div>
+                </div>
+
+                {/* 메인 3열 그리드 */}
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                  
+                  {/* 1. 업무 리스트 */}
+                  <div className="flex flex-col gap-3">
+                    <h3 className={`font-bold flex items-center gap-2 ${theme.textMain}`}>
+                      <Icon name="AlertTriangle" size={16} className={theme.textHighlight} /> 발주된 업무 리스트
+                    </h3>
+                    {mockMissions.map(m => (
+                      <div key={m.id} className={`p-4 cursor-pointer hover:opacity-80 transition-opacity ${theme.cardBg} ${theme.cardBorder} ${theme.radius}`}>
+                        <div className="flex justify-between items-start mb-2">
+                          <div className={`font-bold ${theme.textMain}`}>{m.name}</div>
+                          <div className={`text-xs px-2 py-1 ${theme.panelBg} ${theme.cardBorder} ${theme.textMuted} ${theme.radius}`}>
+                            {m.zone}
+                          </div>
+                        </div>
+                        <div className={`flex justify-between text-sm ${theme.textMuted}`}>
+                          <span className="flex items-center gap-1"><Icon name="DollarSign" size={14}/> {m.reward}</span>
+                          <span>소요시간: {m.time}</span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+
+                  {/* 2. 매칭 및 파견 (중앙) */}
+                  <div className={`p-5 flex flex-col justify-between ${theme.cardBg} ${theme.cardBorder} ${theme.radius}`}>
+                    <div>
+                      <h3 className={`font-bold mb-4 flex items-center gap-2 justify-center ${theme.textMain}`}>
+                        <Icon name="Crosshair" size={18} className={theme.textHighlight} /> 업무 매칭 및 파견
+                      </h3>
+                      
+                      <div className={`p-4 mb-4 text-center border-dashed border-2 ${theme.cardBorder} ${theme.radius}`}>
+                        <div className={`text-sm ${theme.textMuted} mb-1`}>선택된 업무</div>
+                        <div className={`font-bold ${theme.textHighlight}`}>섹터 7 데이터 추출</div>
+                      </div>
+
+                      <div className="flex justify-center my-2">
+                        <Icon name="ArrowRight" size={16} className={theme.textMuted} />
+                      </div>
+
+                      <div className={`p-4 mb-6 text-center border-dashed border-2 ${theme.cardBorder} ${theme.radius}`}>
+                        <div className={`text-sm ${theme.textMuted} mb-1`}>배정할 용병</div>
+                        <div className={`font-bold ${theme.textMain}`}>잭스 (Jax) - Rank S</div>
+                      </div>
+
+                      {/* 보수 분배 설정 */}
+                      <div className="mb-6">
+                        <div className={`flex justify-between text-sm mb-2 ${theme.textMain}`}>
+                          <span>회사 몫 ({100 - ratio}%)</span>
+                          <span>용병 몫 ({ratio}%)</span>
+                        </div>
+                        <input 
+                          type="range" 
+                          min="10" max="90" step="10"
+                          value={ratio}
+                          onChange={(e) => setRatio(Number(e.target.value))}
+                          className={`w-full h-3 appearance-none cursor-pointer ${theme.sliderBase} ${theme.radius} ${theme.sliderThumb}`}
+                          style={{ background: `linear-gradient(to right, ${theme.sliderFillColor} ${fillPercent}%, ${theme.sliderBaseColor} ${fillPercent}%)` }} 
+                        />
+                        <div className={`text-xs mt-2 text-center ${theme.textMuted}`}>
+                          * 용병 몫이 낮으면 만족도가 하락하여 반란 이벤트가 발생할 수 있습니다.
+                        </div>
+                      </div>
+                    </div>
+
+                    <button className={`w-full py-4 text-lg font-bold flex justify-center items-center gap-2 ${theme.buttonPrimary} ${theme.radius}`}>
+                      <Icon name="Zap" size={20} /> 파견 시작
+                    </button>
+                  </div>
+
+                  {/* 3. 용병 관리 및 복지 */}
+                  <div className="flex flex-col gap-6">
+                    {/* 용병 리스트 */}
+                    <div>
+                      <h3 className={`font-bold mb-3 flex items-center gap-2 ${theme.textMain}`}>
+                        <Icon name="Shield" size={16} className={theme.textHighlight} /> 대기중인 용병
+                      </h3>
+                      <div className="flex flex-col gap-2">
+                        {mockMercs.map(merc => (
+                          <div key={merc.id} className={`p-3 flex items-center justify-between ${theme.cardBg} ${theme.cardBorder} ${theme.radius}`}>
+                            <div>
+                              <div className={`font-bold ${theme.textMain}`}>{merc.name} <span className={theme.textHighlight}>[{merc.rank}]</span></div>
+                              <div className={`text-xs ${theme.textMuted}`}>{merc.status}</div>
+                            </div>
+                            <div className="w-24 text-right">
+                              <div className={`text-xs mb-1 ${theme.textMuted}`}>만족도 {merc.satisfaction}%</div>
+                              {/* 수정: 높이를 h-1.5 -> h-3으로 키우고, rounded-full 대신 theme.radius를 적용 */}
+                              <div className={`w-full h-3 ${theme.progressBg} ${theme.radius} overflow-hidden`}>
+                                <div className={`h-full ${theme.progressFill} transition-all`} style={{width: `${merc.satisfaction}%`}}></div>
+                              </div>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* 용병 서비스 (바/임플란트/보험) */}
+                    <div>
+                      <h3 className={`font-bold mb-3 flex items-center gap-2 ${theme.textMain}`}>
+                        <Icon name="Activity" size={16} className={theme.textHighlight} /> 복지 서비스 시설
+                      </h3>
+                      <div className="grid grid-cols-3 gap-2">
+                        <button className={`p-3 flex flex-col items-center justify-center gap-2 hover:opacity-80 transition-opacity ${theme.cardBg} ${theme.cardBorder} ${theme.textMain} ${theme.radius}`}>
+                          <Icon name="Beer" size={20} className={theme.textHighlight} />
+                          <span className="text-xs font-bold">바 (Bar)</span>
+                        </button>
+                        <button className={`p-3 flex flex-col items-center justify-center gap-2 hover:opacity-80 transition-opacity ${theme.cardBg} ${theme.cardBorder} ${theme.textMain} ${theme.radius}`}>
+                          <Icon name="Activity" size={20} className={theme.textHighlight} />
+                          <span className="text-xs font-bold">임플란트</span>
+                        </button>
+                        <button className={`p-3 flex flex-col items-center justify-center gap-2 hover:opacity-80 transition-opacity ${theme.cardBg} ${theme.cardBorder} ${theme.textMain} ${theme.radius}`}>
+                          <Icon name="Shield" size={20} className={theme.textHighlight} />
+                          <span className="text-xs font-bold">생명보험</span>
+                        </button>
+                      </div>
+                      <div className={`mt-2 text-xs text-center ${theme.textMuted}`}>
+                        서비스 레벨업 시 랭킹(업무 효율) 보너스 획득
+                      </div>
+                    </div>
+
+                  </div>
+                </div>
+              </div>
+            </div>
+          );
+        }
+
+        // --- 메인 앱 렌더링 ---
+        const App = () => {
+          return (
+            <div className="min-h-screen bg-gray-900 font-sans">
+              <Dashboard theme={themes.cyberpunk} />
+              <Dashboard theme={themes.lcd} />
+              <Dashboard theme={themes.terminal} />
+            </div>
+          );
+        }
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+</body>
+</html>

@@ -1,0 +1,24 @@
+# Dependencies
+node_modules/
+venv/
+
+# Large binaries (AI model weights ~23GB, llama-server ~1GB)
+model/
+tools/
+
+# Build output
+dist/
+*.tsbuildinfo
+
+# Test / tooling artifacts
+test-results/
+coverage/
+.playwright-mcp/
+narrator_server.log
+
+# Local runtime state (regenerated on run)
+scripts/ai_pipeline/runtime_world_state.json
+
+# Editor / OS
+.DS_Store
+Thumbs.db
