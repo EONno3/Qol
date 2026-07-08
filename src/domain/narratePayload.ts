@@ -5,6 +5,7 @@ import type {
   Mission,
   NodeResolutionLog,
   NodeRole,
+  NarrativeMode,
   ResultReport,
   TriggeredTag,
 } from "../data/types";
@@ -35,6 +36,8 @@ export interface NarrateNodeResolutionFact {
   tagPassChanceDelta: number;
   challengeTags: string[];
   triggeredTags: NarrateTriggeredTagFact[];
+  /** 캐치업(현장 개입) 노드 여부 — AI 서사에 픽서 개입 팩트 반영용 */
+  intervened: boolean;
 }
 
 export interface NarratePayload {
@@ -46,6 +49,12 @@ export interface NarratePayload {
   nodeLogs: string[];
   triggeredTags: NarrateTriggeredTagFact[];
   nodeResolutions: NarrateNodeResolutionFact[];
+  /** AI 서사 화자 모드 — 어사인=merc_diary / 캐치업=fixer_field_log */
+  narrativeMode: NarrativeMode;
+}
+
+export function resolveNarrativeMode(report: ResultReport): NarrativeMode {
+  return report.catchUpActive ? "fixer_field_log" : "merc_diary";
 }
 
 export interface NarratePayloadContext {
@@ -163,6 +172,7 @@ function enrichNodeResolution(
     tagPassChanceDelta: node.tagPassChanceDelta,
     challengeTags: node.challengeTags ?? [],
     triggeredTags: (node.triggeredTags ?? []).map((tag) => enrichTriggeredTag(tag, merc, context)),
+    intervened: node.intervened ?? false,
   };
 }
 
@@ -188,5 +198,6 @@ export function buildNarratePayload(
     nodeLogs: report.nodeLogKo ?? [],
     triggeredTags,
     nodeResolutions,
+    narrativeMode: resolveNarrativeMode(report),
   };
 }

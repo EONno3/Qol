@@ -29,26 +29,31 @@ export function ResultReport({ report, mission, merc, onSettle }: Props) {
       ? report.aiNarrativeKo
       : buildFallbackNarrative(report, mission, merc);
 
+  const isCatchUp = report.catchUpActive === true;
+  const narrativeLabel = isCatchUp
+    ? "현장 개입 기록 (관제소 로그)"
+    : "현장 보고 (용병 일지)";
+  const reportKindLabel = isCatchUp ? "캐치업 · 관제소 기록" : "어사인 보고";
+
   return (
     <section>
       <h2>결과 보고서</h2>
       <p className="muted">
-        {mission.displayNameKo} · {merc.aliasKo} · 어사인 보고
+        {mission.displayNameKo} · {merc.aliasKo} · {reportKindLabel}
       </p>
 
       <div className={`report-folder ${tierClass(mission.tier)}`}>
         <div className="report-nodelog" style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
-          <div className="folder-page-label">현장 보고 (용병 일지)</div>
+          <div className="folder-page-label">{narrativeLabel}</div>
           
-          {/* 용병 1인칭 현장 일지 박스 단독 노출 */}
           <div className="narrative-box" style={{
             padding: "20px",
             background: "var(--paper)",
             color: "var(--paper-ink)",
-            borderLeft: "4px solid var(--cyan)",
+            borderLeft: isCatchUp ? "4px solid var(--amber)" : "4px solid var(--cyan)",
             fontSize: "1.15rem",
             lineHeight: "1.7",
-            fontStyle: "italic",
+            fontStyle: isCatchUp ? "normal" : "italic",
             borderRadius: "0 4px 4px 0",
             whiteSpace: "pre-line",
             minHeight: "80px"
@@ -116,6 +121,11 @@ export function ResultReport({ report, mission, merc, onSettle }: Props) {
             <div className={`result-banner ${resultClass(report.resultType)}`}>
               {resultTypeLabel[report.resultType]}
             </div>
+            {report.catchUpBonusEarned && (
+              <div style={{ marginTop: "8px", color: "var(--amber)", fontWeight: 600 }}>
+                [현장 개입 성공] 픽서 직접 개입으로 추가 보상 자격 확보
+              </div>
+            )}
           </div>
 
           <div className="report-ledger">

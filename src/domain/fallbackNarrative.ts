@@ -17,6 +17,9 @@ export function buildFallbackNarrative(
   mission: Mission,
   merc: Mercenary
 ): string {
+  if (report.catchUpActive) {
+    return buildFixerFallbackNarrative(report, mission, merc);
+  }
   const who = merc.aliasKo || merc.displayNameKo || "용병";
   const missionName = mission.displayNameKo || "이번 건";
   const isKia = report.statusChanges.some((c) => c.statusId === STATUS_KIA);
@@ -64,6 +67,53 @@ export function buildFallbackNarrative(
         `'${missionName}' 도중 예상 못 한 변수가 터졌다. ` +
         `계획대로 흘러간 게 하나도 없었고, 현장은 순식간에 아수라장이 됐지. ` +
         `일단 살아 돌아온 것만으로도 다행이라 해야 하나. — ${who}`
+      );
+  }
+}
+
+/** 캐치업(FALLBACK) — 관제소 픽서 1인칭 관제 기록 */
+function buildFixerFallbackNarrative(
+  report: ResultReport,
+  mission: Mission,
+  merc: Mercenary
+): string {
+  const mercLabel = merc.aliasKo || merc.displayNameKo || "파견 용병";
+  const missionName = mission.displayNameKo || "이번 건";
+  const intervened = (report.nodeResolutions ?? []).filter((n) => n.intervened);
+  const interventionNote =
+    intervened.length > 0
+      ? intervened
+          .map(
+            (n) =>
+              ` 「${n.nameKo}」에서 위험 징후를 포착해 루트·전술 데이터 지시를 내렸고,`
+          )
+          .join("")
+      : "";
+
+  switch (report.resultType) {
+    case "success":
+      return (
+        `[관제소 기록] '${missionName}'. 드론 피드로 ${mercLabel}의 행적을 따라갔다.` +
+        interventionNote +
+        ` 그는 내 지시에 맞춰 각 관문을 넘겼다. 목표 달성, 회수 완료.`
+      );
+    case "partial_success":
+      return (
+        `[관제소 기록] '${missionName}'. ${mercLabel} 현장을 지켜보는 중 변수가 터졌다.` +
+        interventionNote +
+        ` 일부만 확보한 채 퇴각 지시를 내렸다.`
+      );
+    case "failure":
+      return (
+        `[관제소 기록] '${missionName}'. ${mercLabel} 신호가 끊기기 직전까지 피드를 붙잡았다.` +
+        interventionNote +
+        ` 개입에도 핵심 목표를 확보하지 못했다.`
+      );
+    default:
+      return (
+        `[관제소 기록] '${missionName}'. ${mercLabel} 현장 관찰 중 예상 외 변수.` +
+        interventionNote +
+        ` 상황 정리 후 보고서를 마감한다.`
       );
   }
 }

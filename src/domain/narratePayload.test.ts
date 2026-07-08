@@ -160,4 +160,54 @@ describe("buildNarratePayload — nodeResolutions → /narrate 페이로드 (Pha
 
     expect(payload.nodeResolutions).toEqual([]);
   });
+
+  it("T-DC-NARR-1: 개입 노드의 intervened 플래그가 payload로 전파된다", () => {
+    const report = createMockResultReport({
+      nodeResolutions: [
+        { ...entryResolution, intervened: false },
+        { ...electricObstacleResolution, intervened: true },
+      ],
+    });
+    const payload = buildNarratePayload(
+      report,
+      createMockMission(),
+      createMockMercenary(),
+      { gearDefs, implantDefs }
+    );
+
+    expect(payload.nodeResolutions![0]?.intervened).toBe(false);
+    expect(payload.nodeResolutions![1]?.intervened).toBe(true);
+  });
+
+  it("T-DC-NARR-2: intervened 미지정 노드는 기본 false로 전달된다", () => {
+    const report = createMockResultReport({
+      nodeResolutions: [entryResolution],
+    });
+    const payload = buildNarratePayload(report, createMockMission(), createMockMercenary());
+
+    expect(payload.nodeResolutions![0]?.intervened).toBe(false);
+  });
+
+  it("T-DC-NARR-3: catchUpActive=true이면 narrativeMode=fixer_field_log", () => {
+    const report = createMockResultReport({ catchUpActive: true });
+    const payload = buildNarratePayload(report, createMockMission(), createMockMercenary());
+
+    expect(payload.narrativeMode).toBe("fixer_field_log");
+  });
+
+  it("T-DC-NARR-4: catchUpActive 미설정/false이면 narrativeMode=merc_diary", () => {
+    const active = createMockResultReport({ catchUpActive: true });
+    const plain = createMockResultReport({ catchUpActive: false });
+    const unset = createMockResultReport({});
+
+    expect(buildNarratePayload(active, createMockMission(), createMockMercenary()).narrativeMode).toBe(
+      "fixer_field_log"
+    );
+    expect(buildNarratePayload(plain, createMockMission(), createMockMercenary()).narrativeMode).toBe(
+      "merc_diary"
+    );
+    expect(buildNarratePayload(unset, createMockMission(), createMockMercenary()).narrativeMode).toBe(
+      "merc_diary"
+    );
+  });
 });

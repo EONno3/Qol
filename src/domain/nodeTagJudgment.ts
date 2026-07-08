@@ -35,6 +35,8 @@ export interface NodeJudgmentParams {
   loadoutTags: TaggedAttribution[];
   rng: () => number;
   interpretations?: TagMissionInterpretation[];
+  /** 캐치업 현장 개입 노드에 적용할 통과 확률 페널티(%p). 기본 0 = 동작 불변 */
+  catchUpPenaltyPercent?: number;
 }
 
 const CRIT_MARGIN = 25;
@@ -129,6 +131,7 @@ export function resolveNodeJudgment(params: NodeJudgmentParams): NodeJudgmentRes
     loadoutTags,
     rng,
     interpretations = TAG_MISSION_INTERPRETATIONS,
+    catchUpPenaltyPercent = 0,
   } = params;
 
   const statKey = node.statCheck as StatKey;
@@ -149,7 +152,7 @@ export function resolveNodeJudgment(params: NodeJudgmentParams): NodeJudgmentRes
   }
 
   const basePass = computeNodePassChance(stars, effectiveStat);
-  const passChance = Math.max(5, Math.min(98, basePass + tagDelta));
+  const passChance = Math.max(5, Math.min(98, basePass + tagDelta - catchUpPenaltyPercent));
   const roll = Math.floor(rng() * 100) + 1;
 
   let outcome: NodeOutcome;

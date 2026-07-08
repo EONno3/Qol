@@ -280,6 +280,95 @@ class TestNarratePromptNodeResolutions(unittest.TestCase):
 
 
 
+INTERVENED_NODE_RESOLUTIONS = [
+    {
+        "nodeInstanceId": "node_obstacle_1",
+        "nameKo": "중간 관문 1",
+        "role": "obstacle",
+        "roleLabelKo": "관문",
+        "outcome": "critical",
+        "passChance": 40,
+        "tagPassChanceDelta": 0,
+        "challengeTags": [],
+        "triggeredTags": [],
+        "intervened": True,
+    },
+    {
+        "nodeInstanceId": "node_objective_2",
+        "nameKo": "핵심 목표 수행",
+        "role": "objective",
+        "roleLabelKo": "목표",
+        "outcome": "pass",
+        "passChance": 55,
+        "tagPassChanceDelta": 0,
+        "challengeTags": [],
+        "triggeredTags": [],
+        "intervened": False,
+    },
+]
+
+
+class TestNarratePromptFixerFieldLog(unittest.TestCase):
+    """T-DC-NARR-FIXER: 캐치업(픽서 1인칭) 서사 모드 프롬프트."""
+
+    def _fixer_payload(self):
+        return {
+            **base_payload(),
+            "narrativeMode": "fixer_field_log",
+            "nodeResolutions": INTERVENED_NODE_RESOLUTIONS,
+            "triggeredTags": [],
+        }
+
+    def test_t_dc_narr_fixer_1_fixer_system_prompt_not_merc(self):
+        """fixer_field_log 모드는 용병 페르소나·레퍼런스 대신 픽서(관제소) 1인칭 지시를 사용한다."""
+        prompt = build_narrate_prompt(self._fixer_payload())
+
+        self.assertIn("관제소", prompt)
+        self.assertIn("픽서", prompt)
+        self.assertIn("1인칭", prompt)
+        self.assertNotIn("당신은 돔 도시 '콜(Qol)'의 용병", prompt)
+        breaker_ref = PERSONA_STYLE_REFERENCES["merc_breaker_01"]
+        self.assertNotIn(breaker_ref, prompt)
+
+    def test_t_dc_narr_fixer_2_observer_intervention_facts(self):
+        """개입 구간은 [개입 지시] 팩트로, 관찰→감지→지시 골격 가이드가 있다."""
+        prompt = build_narrate_prompt(self._fixer_payload())
+
+        self.assertIn("[개입 지시 구간]", prompt)
+        self.assertIn("관찰", prompt)
+        self.assertIn("감지", prompt)
+        self.assertIn("지시", prompt)
+        self.assertNotIn("[개입 수행]", prompt)
+        self.assertIn("누가", prompt)  # 금지어로 명시
+        self.assertIn("버튼", prompt)  # 환각 통제
+
+    def test_t_dc_narr_fixer_3_ban_dry_status_only(self):
+        """건조한 상태 나열만으로 끝내지 말라는 지시가 있다."""
+        prompt = build_narrate_prompt(self._fixer_payload())
+
+        self.assertIn("통과 확인", prompt)  # 금지 예시로 명시
+
+    def test_t_dc_narr_fixer_4_merc_mode_unchanged_without_narrative_mode(self):
+        """기본(merc_diary) 모드는 용병 1인칭 프롬프트를 유지한다."""
+        data = {**base_payload(), "nodeResolutions": SAMPLE_NODE_RESOLUTIONS, "triggeredTags": []}
+        prompt = build_narrate_prompt(data)
+
+        self.assertIn("당신은 돔 도시 '콜(Qol)'의 용병", prompt)
+        self.assertNotIn("narrativeMode", prompt)
+
+
+class TestNarratePromptCatchUpIntervention(unittest.TestCase):
+    """레거시: merc_diary 경로 — 개입 팩트는 fixer_field_log로 이전됨."""
+
+    def test_t_dc_narr_prompt_3_no_fact_when_no_intervention(self):
+        """개입이 없으면 merc 모드에서 개입 팩트가 주입되지 않는다."""
+        data = {**base_payload(), "nodeResolutions": SAMPLE_NODE_RESOLUTIONS, "triggeredTags": []}
+        prompt = build_narrate_prompt(data)
+
+        self.assertNotIn("[개입 지시 구간]", prompt)
+        self.assertNotIn("관제소(픽서) 현장 개입", prompt)
+
+
 class TestNarratePromptLightweight(unittest.TestCase):
 
     """경량화·팩트 중심 프롬프트 검증."""

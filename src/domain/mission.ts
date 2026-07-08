@@ -1,6 +1,13 @@
 import type { GameState } from "./state";
+import type { CatchUpConfig } from "../data/types";
 import { allMissions, mercenaries, gearDefs, implantDefs } from "../data/seed";
+import { GAME_CONFIG } from "../data/config";
 import { simulateMission } from "./engine";
+
+export interface StartDispatchOptions {
+  /** 캐치업(현장 개입) 설정. 지정 시 코스트 ×1.5(올림) + 개입 노드 판정 페널티 반영 */
+  catchUp?: CatchUpConfig;
+}
 
 export function acceptMission(state: GameState, missionId: string): GameState {
   if (!state.availableMissions.includes(missionId)) {
@@ -13,7 +20,12 @@ export function acceptMission(state: GameState, missionId: string): GameState {
   };
 }
 
-export function startDispatch(state: GameState, missionId: string, mercId: string): GameState {
+export function startDispatch(
+  state: GameState,
+  missionId: string,
+  mercId: string,
+  options?: StartDispatchOptions
+): GameState {
   if (!state.acceptedMissions.includes(missionId)) {
     return state; // 수주한 미션이 아님
   }
@@ -25,7 +37,12 @@ export function startDispatch(state: GameState, missionId: string, mercId: strin
   if (!missionDef || !mercDef) {
     return state; // 데이터가 없으면 진행 불가
   }
-  const cost = mercDef.commandCost ?? 0;
+  const catchUpActive =
+    !!options?.catchUp && options.catchUp.interventionNodeNamesKo.length > 0;
+  const baseCost = mercDef.commandCost ?? 0;
+  const cost = catchUpActive
+    ? Math.ceil(baseCost * GAME_CONFIG.catchUp.costMultiplier)
+    : baseCost;
 
   if (state.currentCommandPoints < cost) {
     return state; // 통제력 부족
@@ -42,12 +59,18 @@ export function startDispatch(state: GameState, missionId: string, mercId: strin
   };
 
   // 파견 시작 시 시뮬레이션 돌려서 생성된 결과를 상태에 저장해 둠
-  const simulationResult = simulateMission(missionDef, mercDef, Math.random, {
-    gearOwner: state.gearOwner,
-    implantOwner: state.implantOwner,
-    gearDefs,
-    implantDefs,
-  });
+  const simulationResult = simulateMission(
+    missionDef,
+    mercDef,
+    Math.random,
+    {
+      gearOwner: state.gearOwner,
+      implantOwner: state.implantOwner,
+      gearDefs,
+      implantDefs,
+    },
+    catchUpActive ? options!.catchUp : undefined
+  );
   const newGeneratedReports = { ...state.generatedReports };
   newGeneratedReports[dispatchId] = simulationResult.report;
 

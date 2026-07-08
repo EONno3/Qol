@@ -232,7 +232,7 @@ def format_triggered_tags_section(triggered_tags: list) -> str:
 
 
 
-def _format_node_resolution_block(index: int, node: dict) -> str:
+def _format_node_resolution_block(index: int, node: dict, *, narrative_mode: str = "merc_diary") -> str:
 
     name = node.get("nameKo", "관문")
 
@@ -294,13 +294,23 @@ def _format_node_resolution_block(index: int, node: dict) -> str:
 
             lines.append(f"  - {_triggered_fact_line(tag)}")
 
+    if node.get("intervened") and narrative_mode == "fixer_field_log":
+
+        lines.append(
+
+            "  - [개입 지시 구간] 이 관문에서 위험·교착 감지 — "
+
+            "픽서가 원격 지시(루트 수정·전술 데이터 링크·보안망 우회) 전달"
+
+        )
+
     return "\n".join(lines)
 
 
 
 
 
-def format_node_resolutions_section(node_resolutions: list) -> str:
+def format_node_resolutions_section(node_resolutions: list, narrative_mode: str = "merc_diary") -> str:
 
     """nodeResolutions를 관문별 시간순 팩트 블록으로 변환."""
 
@@ -316,9 +326,101 @@ def format_node_resolutions_section(node_resolutions: list) -> str:
 
     for i, node in enumerate(node_resolutions, start=1):
 
-        lines.append(_format_node_resolution_block(i, node))
+        lines.append(_format_node_resolution_block(i, node, narrative_mode=narrative_mode))
 
     return "\n".join(lines) + "\n"
+
+
+
+
+
+FIXER_OBSERVER_STYLE_REFERENCE = (
+
+    "드론 피드에서 벨벳 나이프가 검문 설에 걸리려 할 때, 탐지 신호가 튀어 올랐다. "
+
+    "나는 즉시 측면 통로 좌표와 전술 데이터 패킷을 떨어뜨렸다. "
+
+    "그는 내 지시대로 틈을 비집고 넘어갔다."
+
+)
+
+
+
+
+
+def build_fixer_field_log_system_prompt(merc_name: str) -> str:
+
+    """캐치업 모드 — 관제소 픽서(플레이어) 1인칭 관찰·지시 기록."""
+
+    rules = (
+
+        "규칙:\n"
+
+        "1. 당신은 돔 도시 '콜(Qol)' 용병 관제소에 앉아 있는 픽서(플레이어)이다. "
+
+        "드론 피드로 파견 용병을 **관찰**하며, 1인칭(나) 시점의 현장 개입 기록을 작성하라.\n"
+
+        f"2. 파견 용병 '{merc_name}'을 이름으로 직접 지칭하라. "
+
+        "용병이 현장에서 일하는 모습을 **지켜보고**, 위험·교착·갈림길 징후를 **감지**한 뒤, "
+
+        "[개입 지시 구간]에서는 **내가 내린 원격 지시**로 위기(노드)를 넘기게 서술하라.\n"
+
+        "3. 각 관문은 최소한 「관찰(용병 행동) → (위험 시) 감지 → (개입 구간만) 지시 → 결과」 흐름을 갖춰라. "
+
+        "「통과 확인」「다음 지점」처럼 **건조한 상태 나열만**으로 끝내지 마라.\n"
+
+        "4. '[개입 지시 구간]' 표시가 있는 관문만 내가 개입한다. "
+
+        "개입 수단은 드론 피드 모니터링, 보안망 원격 우회, 전술 데이터 링크 전송, 루트 수정 지시로 한정하라. "
+
+        "팩트 블록의 [개입 지시 구간]·환경/위협 등 **괄호 라벨을 본문에 그대로 복사하지 마라**.\n"
+
+        "5. 절대 금지: '누가', '어디선가', '외부에서' 등 모호한 3인칭. "
+
+        "버튼 클릭, 무기 직접 조작, 현장 직접 투입 등 시스템에 없는 인터랙션. "
+
+        "수치·확률·영문 코드·시스템 용어.\n"
+
+    )
+
+
+
+    skeleton = (
+
+        "\n아래 구조(내부 골격)에 맞춰 작성하되, 출력 본문에 [관찰]/[감지]/[지시]/[결과] "
+
+        "라벨은 붙이지 말고 줄글 문단만 써라:\n"
+
+        "[관찰]: 의뢰 개시 후, 관문별로 용병이 현장에서 무엇을 하는지 드론 피드로 지켜본 장면. (1~2문장)\n"
+
+        "[감지]: 환경/위협·차질·치명 outcome 등으로 위험·교착·갈림길 징후를 포착한 순간. (개입 없는 구간도 가능)\n"
+
+        "[지시]: [개입 지시 구간]에서만 — 내가 루트 수정·전술 데이터·보안망 우회 등 **구체적 지시**를 내린 행동. (1~2문장)\n"
+
+        "[결과]: 해당 관문 통과·실패·퇴각 등 결론 팩트 반영.\n"
+
+        "[마무리]: 작전 전체 결과·정산에 대한 관제 기록 1~2문장.\n"
+
+    )
+
+
+
+    return (
+
+        f"당신은 돔 도시 '콜(Qol)' 용병 관제소의 픽서이다.\n\n"
+
+        f"아래 팩트를 바탕으로 1인칭 **관찰·개입** 기록을 한국어로 작성하라.\n\n"
+
+        f"{rules}"
+
+        f"{skeleton}\n"
+
+        f"톤앤매너 레퍼런스 (말투·리듬·관찰→감지→지시 흐름을 모방하라. 내용·인물은 복사하지 말 것):\n"
+
+        f"{FIXER_OBSERVER_STYLE_REFERENCE}\n"
+
+    )
 
 
 
@@ -335,6 +437,8 @@ def build_narrate_system_prompt(
     include_triggered_guidance: bool,
 
     include_node_resolution_guidance: bool,
+
+    include_intervention_guidance: bool = False,
 
 ) -> str:
 
@@ -370,6 +474,22 @@ def build_narrate_system_prompt(
 
 
 
+    intervention_block = ""
+
+    if include_intervention_guidance:
+
+        intervention_block = (
+
+            "※ '관제소(픽서) 현장 개입' 표시가 있는 관문은 픽서의 타이밍 맞는 개입·"
+
+            "외부 지원 데이터·갑작스러운 루트 수정 지시 덕분에 넘어갔다는 사실을 "
+
+            "작전 일지에 반드시 자연스럽게 녹여라(수치·시스템 용어 금지).\n"
+
+        )
+
+
+
     skeleton = (
 
         "\n아래 구조(내부 골격)에 맞춰 작성하되, 출력 본문에 [도입]/[핵심]/[마무리] "
@@ -397,6 +517,8 @@ def build_narrate_system_prompt(
         f"아래 팩트를 바탕으로 1인칭 작전 일지(용병 독백)를 한국어로 작성하라.\n\n"
 
         f"{rules}"
+
+        f"{intervention_block}"
 
         f"{skeleton}\n"
 
@@ -428,6 +550,8 @@ def build_narrate_prompt(data: dict) -> str:
 
     node_resolutions = data.get("nodeResolutions") or []
 
+    narrative_mode = data.get("narrativeMode", "merc_diary")
+
 
 
     result_label = {
@@ -446,7 +570,11 @@ def build_narrate_prompt(data: dict) -> str:
 
 
 
-    node_resolutions_section = format_node_resolutions_section(node_resolutions)
+    node_resolutions_section = format_node_resolutions_section(
+
+        node_resolutions, narrative_mode=narrative_mode
+
+    )
 
     has_node_resolutions = bool(node_resolutions_section)
 
@@ -466,17 +594,25 @@ def build_narrate_prompt(data: dict) -> str:
 
     )
 
-    system_prompt = build_narrate_system_prompt(
+    if narrative_mode == "fixer_field_log":
 
-        merc_name,
+        system_prompt = build_fixer_field_log_system_prompt(merc_name)
 
-        merc_id,
+    else:
 
-        include_triggered_guidance=has_any_triggered,
+        system_prompt = build_narrate_system_prompt(
 
-        include_node_resolution_guidance=has_node_resolutions,
+            merc_name,
 
-    )
+            merc_id,
+
+            include_triggered_guidance=has_any_triggered,
+
+            include_node_resolution_guidance=has_node_resolutions,
+
+            include_intervention_guidance=False,
+
+        )
 
 
 

@@ -19,6 +19,10 @@ narrator_server.log
 # Local runtime state (regenerated on run)
 scripts/ai_pipeline/runtime_world_state.json
 
+# Python bytecode cache
+__pycache__/
+*.pyc
+
 # Editor / OS
 .DS_Store
 Thumbs.db

@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { getMercenary, getMission } from "./data/lookups";
 import { mercenaries as allMercs, allMissions, gearDefs, implantDefs } from "./data/seed";
-import type { ResultReport as Report } from "./data/types";
+import type { CatchUpConfig, ResultReport as Report } from "./data/types";
 import { acceptMission, checkCompletedDispatches, startDispatch } from "./domain/mission";
 import { applySettlement, resolveReport } from "./domain/settlement";
 import { createInitialState, type GameState } from "./domain/state";
@@ -310,9 +310,9 @@ export function App({ initialState, bypassTitle = false }: { initialState?: Game
     setScreen("matching");
   }
 
-  function handleDeploy(mercId: string) {
+  function handleDeploy(mercId: string, catchUp?: CatchUpConfig) {
     if (!selectedMissionId) return;
-    setState(s => startDispatch(s, selectedMissionId, mercId));
+    setState(s => startDispatch(s, selectedMissionId, mercId, catchUp ? { catchUp } : undefined));
     setScreen("desk"); // 출격 후 바로 데스크 관제 화면으로 전환
   }
 

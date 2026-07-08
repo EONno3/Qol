@@ -177,3 +177,30 @@ describe("ResultReport AI 브리핑 렌더링", () => {
     expect(screen.queryByText("노드 1단계 성공 팩트")).not.toBeInTheDocument();
   });
 });
+
+describe("ResultReport 캐치업 UI (T-DC-UI-NARR)", () => {
+  it("T-DC-UI-NARR-1: catchUpActive=true이면 관제소 로그 라벨을 표시한다", () => {
+    const report: Report = {
+      ...baseReport,
+      catchUpActive: true,
+      aiNarrativeKo: "관제소에서 드론 피드로 모니터링한 기록이다.",
+    };
+
+    render(
+      <ResultReport report={report} mission={mockMission} merc={mockMerc} onSettle={vi.fn()} />
+    );
+
+    expect(screen.getByText("현장 개입 기록 (관제소 로그)")).toBeInTheDocument();
+    expect(screen.queryByText("현장 보고 (용병 일지)")).not.toBeInTheDocument();
+    expect(screen.getByText(/캐치업 · 관제소 기록/)).toBeInTheDocument();
+  });
+
+  it("T-DC-UI-NARR-2: catchUpActive 미설정이면 용병 일지 라벨을 유지한다", () => {
+    render(
+      <ResultReport report={baseReport} mission={mockMission} merc={mockMerc} onSettle={vi.fn()} />
+    );
+
+    expect(screen.getByText("현장 보고 (용병 일지)")).toBeInTheDocument();
+    expect(screen.queryByText("현장 개입 기록 (관제소 로그)")).not.toBeInTheDocument();
+  });
+});

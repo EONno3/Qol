@@ -1,4 +1,5 @@
-import type { Mercenary, Mission, MissionConditionTarget, StatKey } from "../data/types";
+import { useState } from "react";
+import type { CatchUpConfig, Mercenary, Mission, MissionConditionTarget, StatKey } from "../data/types";
 import type { DispatchLoadoutContext } from "../domain/gearStatBonus";
 import { getEffectiveStatForNode } from "../domain/gearStatBonus";
 import { canDeploy, visibleMatchInfo } from "../domain/matching";
@@ -7,6 +8,12 @@ import { calculateGearDestructionProb } from "../domain/engine";
 import { evaluateEntryGate } from "../domain/entryGate";
 import { evaluateVisibilityExposure } from "../domain/visibilityPenalty";
 import { getSurvivalBreakdown } from "../domain/survival";
+import {
+  catchUpSelectableNodeNames,
+  maxCatchUpInterventions,
+  selectCatchUpNodes,
+} from "../domain/catchUp";
+import { GAME_CONFIG } from "../data/config";
 import { visibilityName } from "../data/lookups";
 import { outlookLabel, verdictClass, verdictLabel } from "./labels";
 import { SlideToDeploy } from "./SlideToDeploy";
@@ -21,7 +28,7 @@ interface Props {
   busyMercIds: string[];
   loadout?: DispatchLoadoutContext;
   onSelectMerc: (mercId: string) => void;
-  onDeploy: (mercId: string) => void;
+  onDeploy: (mercId: string, catchUp?: CatchUpConfig) => void;
   onBack: () => void;
 }
 
@@ -86,6 +93,37 @@ export function MercMatching({
   const slotMerc = selectedMercId
     ? mercenaries.find((m) => m.mercId === selectedMercId) ?? null
     : null;
+
+  const [catchUpOn, setCatchUpOn] = useState(false);
+  const [pickedNodes, setPickedNodes] = useState<string[]>([]);
+  const canPickNodes = analysisLevel >= 2;
+  const selectableNodeNames = catchUpSelectableNodeNames(mission);
+  const interventionCap = maxCatchUpInterventions(selectableNodeNames.length);
+  const catchUpModeActive = catchUpOn && !!slotMerc;
+  const catchUpNodeNames = catchUpModeActive
+    ? selectCatchUpNodes({ mission, analysisLevel, picked: pickedNodes })
+    : [];
+  const catchUpConfig: CatchUpConfig | undefined =
+    catchUpModeActive && catchUpNodeNames.length > 0
+      ? { interventionNodeNamesKo: catchUpNodeNames }
+      : undefined;
+  const baseCommandCost = slotMerc?.commandCost ?? 0;
+  const effectiveCommandCost = catchUpModeActive
+    ? Math.ceil(baseCommandCost * GAME_CONFIG.catchUp.costMultiplier)
+    : baseCommandCost;
+  const insufficientCommandPoints = slotMerc
+    ? currentCommandPoints < effectiveCommandCost
+    : false;
+  // 캐치업 모드인데 개입 노드가 하나도 없으면(L>=2에서 미선택) 출격 차단
+  const catchUpNeedsNodes = catchUpModeActive && catchUpNodeNames.length === 0;
+
+  function toggleNodePick(name: string) {
+    setPickedNodes((prev) => {
+      if (prev.includes(name)) return prev.filter((n) => n !== name);
+      if (prev.length >= interventionCap) return prev; // 상한 초과 무시
+      return [...prev, name];
+    });
+  }
   const match = selectedMercId ? getMatch(mission.missionId, selectedMercId, loadout) : undefined;
   const info = match ? visibleMatchInfo(match, analysisLevel) : null;
   const deployable = match ? canDeploy(match) : false;
@@ -384,35 +422,87 @@ export function MercMatching({
         className="deploy-actions"
         style={{ marginTop: "1rem", display: "flex", gap: "0.5rem", flexDirection: "column" }}
       >
-        {slotMerc && currentCommandPoints < slotMerc.commandCost && (
+        {slotMerc && insufficientCommandPoints && (
           <p style={{ color: "var(--danger)", textAlign: "center", marginBottom: "0.5rem" }}>
-            지휘력이 부족합니다 (현재 {currentCommandPoints} OP / 필요 {slotMerc.commandCost} OP).
+            지휘력이 부족합니다 (현재 {currentCommandPoints} OP / 필요 {effectiveCommandCost} OP).
           </p>
         )}
+
+        {slotMerc && (
+          <div
+            className="catchup-panel"
+            style={{
+              border: `1px solid ${catchUpOn ? "var(--amber)" : "var(--border)"}`,
+              borderRadius: "6px",
+              padding: "0.75rem",
+              marginBottom: "0.5rem",
+            }}
+          >
+            <label style={{ display: "flex", alignItems: "center", gap: "0.5rem", cursor: "pointer" }}>
+              <input
+                type="checkbox"
+                checked={catchUpOn}
+                onChange={(e) => setCatchUpOn(e.target.checked)}
+                aria-label="캐치업 현장 개입 모드"
+              />
+              <strong>[현장 개입] 캐치업 모드</strong>
+            </label>
+
+            {catchUpOn && (
+              <div style={{ marginTop: "0.5rem", fontSize: "0.9rem" }}>
+                <p style={{ color: "var(--amber)", margin: "0 0 0.4rem" }}>
+                  현장 개입 코스트: {effectiveCommandCost} OP (기본 {baseCommandCost} ×1.5, 올림)
+                </p>
+                {canPickNodes ? (
+                  <div>
+                    <p style={{ margin: "0 0 0.3rem", color: "var(--muted)" }}>
+                      개입할 노드 선택 (최대 {interventionCap}개 — 부정 확률 +
+                      {GAME_CONFIG.catchUp.nodePenaltyPercent}%p, 성공 시 추가 보상)
+                    </p>
+                    <div style={{ display: "flex", flexDirection: "column", gap: "0.2rem" }}>
+                      {selectableNodeNames.map((name) => (
+                        <label key={name} style={{ display: "flex", alignItems: "center", gap: "0.4rem" }}>
+                          <input
+                            type="checkbox"
+                            checked={pickedNodes.includes(name)}
+                            onChange={() => toggleNodePick(name)}
+                            disabled={
+                              !pickedNodes.includes(name) && pickedNodes.length >= interventionCap
+                            }
+                          />
+                          {name}
+                        </label>
+                      ))}
+                    </div>
+                    {catchUpNeedsNodes && (
+                      <p style={{ color: "var(--danger)", margin: "0.3rem 0 0" }}>
+                        개입할 노드를 최소 1개 선택하세요.
+                      </p>
+                    )}
+                  </div>
+                ) : (
+                  <p style={{ color: "var(--muted)", margin: 0 }}>
+                    ⚠️ 현장 정보 부족: 개입 노드를 지정할 수 없어 <strong>무작위 {Math.round(
+                      GAME_CONFIG.catchUp.interventionRatio * 100
+                    )}% 구간</strong>에 개입합니다. (심층 분석 Lv.2 이상에서 직접 지정 가능)
+                  </p>
+                )}
+              </div>
+            )}
+          </div>
+        )}
+
         <SlideToDeploy
           disabled={
             entryBlocked ||
             !match ||
             !deployable ||
-            (slotMerc ? currentCommandPoints < slotMerc.commandCost : false)
+            insufficientCommandPoints ||
+            catchUpNeedsNodes
           }
-          label="밀어서 출격 (관제소 위임) ▶"
-          onDeploy={() => selectedMercId && onDeploy(selectedMercId)}
+          label={catchUpConfig ? "밀어서 출격 (현장 개입) ▶" : "밀어서 출격 (관제소 위임) ▶"}
+          onDeploy={() => selectedMercId && onDeploy(selectedMercId, catchUpConfig)}
         />
-        <button
-          className="ghost"
-          disabled
-          title="추후 업데이트 예정: 현장 개입 시 리스크/보상 변동"
-          style={{
-            width: "100%",
-            padding: "12px",
-            border: "1px dashed var(--muted)",
-            color: "var(--muted)",
-            cursor: "not-allowed",
-          }}
-        >
-          [현장 개입] 캐치업 모드 (준비 중)
-        </button>
       </div>
     </section>
   );

@@ -45,6 +45,12 @@ export const GAME_CONFIG = {
     nodeNegativePercent: -22,
     adverseBasePenaltyPercent: -12,
   },
+  // 캐치업(현장 개입) 모드
+  catchUp: {
+    costMultiplier: 1.5, // 지휘력 코스트 배수 (올림 적용)
+    nodePenaltyPercent: 15, // 개입 노드 부정 확률 +15%p (통과 확률 -15)
+    interventionRatio: 0.3, // 최대 개입 노드 비율 (ceil)
+  },
   // AI 관련 밸런스
   ai: {
     aiNarratorEnabled: true, // run_mvp / 로컬 AI 모드 기본 ON (출격 후 토글 시 FALLBACK 고착 방지)

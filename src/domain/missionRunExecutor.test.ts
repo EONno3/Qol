@@ -258,3 +258,109 @@ describe("missionRunExecutor D-B pipeline E2E (T-DB-E2E)", () => {
     expect(result.report.runContextSnapshot?.emergencyCount ?? 0).toBeGreaterThanOrEqual(1);
   });
 });
+
+describe("executeMissionRun 캐치업 현장 개입 (T-DC-ENGINE)", () => {
+  function makeMission() {
+    return createMockMission({
+      difficultyStars: 2,
+      nodes: [
+        { nameKo: "진입", role: "entry", statCheck: "frame" },
+        { nameKo: "목표", role: "objective", statCheck: "frame" },
+        { nameKo: "이탈", role: "exit", statCheck: "frame" },
+      ],
+    });
+  }
+
+  it("T-DC-ENGINE-1: catchUp 미전달/빈 목록이면 판정이 완전히 동일하다 (옵트인, 회귀 방지)", () => {
+    resetNodeInstanceCounter();
+    const base = executeMissionRun({ mission: makeMission(), merc: createMockMercenary(), rng: () => 0.5 });
+    resetNodeInstanceCounter();
+    const empty = executeMissionRun({
+      mission: makeMission(),
+      merc: createMockMercenary(),
+      rng: () => 0.5,
+      catchUp: { interventionNodeNamesKo: [] },
+    });
+    const basePass = (base.report.nodeResolutions ?? []).map((r) => r.passChance);
+    const emptyPass = (empty.report.nodeResolutions ?? []).map((r) => r.passChance);
+    expect(emptyPass).toEqual(basePass);
+  });
+
+  it("T-DC-ENGINE-2: 개입 노드는 통과 확률이 정확히 15%p 낮아진다", () => {
+    resetNodeInstanceCounter();
+    const plain = executeMissionRun({ mission: makeMission(), merc: createMockMercenary(), rng: () => 0.5 });
+    resetNodeInstanceCounter();
+    const intervened = executeMissionRun({
+      mission: makeMission(),
+      merc: createMockMercenary(),
+      rng: () => 0.5,
+      catchUp: { interventionNodeNamesKo: ["목표"] },
+    });
+    const plainObj = (plain.report.nodeResolutions ?? []).find((r) => r.nameKo === "목표")!;
+    const intObj = (intervened.report.nodeResolutions ?? []).find((r) => r.nameKo === "목표")!;
+    expect(intObj.passChance).toBe(Math.max(5, plainObj.passChance - 15));
+    // 개입하지 않은 노드는 영향 없음
+    const plainEntry = (plain.report.nodeResolutions ?? []).find((r) => r.nameKo === "진입")!;
+    const intEntry = (intervened.report.nodeResolutions ?? []).find((r) => r.nameKo === "진입")!;
+    expect(intEntry.passChance).toBe(plainEntry.passChance);
+  });
+
+  it("T-DC-ENGINE-3: 개입 노드 통과 시 보상 플래그 true + [현장 개입] 로그", () => {
+    resetNodeInstanceCounter();
+    const result = executeMissionRun({
+      mission: makeMission(),
+      merc: createMockMercenary(),
+      rng: () => 0.01, // 매우 낮은 굴림 → 통과
+      catchUp: { interventionNodeNamesKo: ["목표"] },
+    });
+    expect(result.report.catchUpBonusEarned).toBe(true);
+    expect((result.report.nodeLogKo ?? []).some((l) => l.includes("[현장 개입]"))).toBe(true);
+  });
+
+  it("T-DC-ENGINE-4: 개입 노드가 모두 실패하면 보상 플래그 false", () => {
+    resetNodeInstanceCounter();
+    const result = executeMissionRun({
+      mission: makeMission(),
+      merc: createMockMercenary({ stats: { frame: 1, cool: 1, wire: 1, cypher: 1, pulse: 1 } }),
+      rng: () => 0.99, // 매우 높은 굴림 → 실패
+      catchUp: { interventionNodeNamesKo: ["목표"] },
+    });
+    expect(result.report.catchUpBonusEarned).toBe(false);
+  });
+
+  it("T-DC-ENGINE-5: 개입 노드의 nodeResolutions 항목은 intervened=true, 비개입 노드는 false", () => {
+    resetNodeInstanceCounter();
+    const result = executeMissionRun({
+      mission: makeMission(),
+      merc: createMockMercenary(),
+      rng: () => 0.5,
+      catchUp: { interventionNodeNamesKo: ["목표"] },
+    });
+    const res = result.report.nodeResolutions ?? [];
+    const objective = res.find((r) => r.nameKo === "목표")!;
+    const nonIntervened = res.find((r) => r.nameKo !== "목표")!;
+    expect(objective.intervened).toBe(true);
+    expect(nonIntervened.intervened).toBe(false);
+  });
+
+  it("T-DC-ENGINE-6: catchUp 활성 시 report.catchUpActive=true", () => {
+    resetNodeInstanceCounter();
+    const result = executeMissionRun({
+      mission: makeMission(),
+      merc: createMockMercenary(),
+      rng: () => 0.5,
+      catchUp: { interventionNodeNamesKo: ["목표"] },
+    });
+    expect(result.report.catchUpActive).toBe(true);
+  });
+
+  it("T-DC-ENGINE-7: catchUp 미사용 시 report.catchUpActive는 undefined", () => {
+    resetNodeInstanceCounter();
+    const result = executeMissionRun({
+      mission: makeMission(),
+      merc: createMockMercenary(),
+      rng: () => 0.5,
+    });
+    expect(result.report.catchUpActive).toBeUndefined();
+  });
+});

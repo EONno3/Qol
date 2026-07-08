@@ -60,4 +60,32 @@ describe("startDispatch", () => {
     expect(next.activeDispatches).toHaveLength(0);
     expect(next.currentCommandPoints).toBe(3);
   });
+
+  it("캐치업 활성 파견은 코스트 ×1.5(올림)를 차감한다 (T-DC-COST)", () => {
+    let state = createInitialState();
+    state.availableMissions = ["mission_lower_fuse_capacitor_01"];
+    state.currentCommandPoints = 10; // 코스트 4 → 캐치업 ceil(4*1.5)=6
+    state = acceptMission(state, "mission_lower_fuse_capacitor_01");
+
+    const next = startDispatch(state, "mission_lower_fuse_capacitor_01", "merc_breaker_01", {
+      catchUp: { interventionNodeNamesKo: ["작전 구역 진입"] },
+    });
+
+    expect(next.activeDispatches).toHaveLength(1);
+    expect(next.currentCommandPoints).toBe(4); // 10 - 6
+  });
+
+  it("캐치업 코스트가 부족하면 파견되지 않는다 (일반이면 가능한 지휘력이라도 차단) (T-DC-COST)", () => {
+    let state = createInitialState();
+    state.availableMissions = ["mission_lower_fuse_capacitor_01"];
+    state.currentCommandPoints = 5; // 일반(4)이면 가능하지만 캐치업(6)이면 부족
+    state = acceptMission(state, "mission_lower_fuse_capacitor_01");
+
+    const next = startDispatch(state, "mission_lower_fuse_capacitor_01", "merc_breaker_01", {
+      catchUp: { interventionNodeNamesKo: ["작전 구역 진입"] },
+    });
+
+    expect(next.activeDispatches).toHaveLength(0);
+    expect(next.currentCommandPoints).toBe(5);
+  });
 });

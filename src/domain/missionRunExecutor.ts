@@ -67,6 +67,8 @@ export interface MissionRunParams {
   rng?: () => number;
   loadout?: DispatchLoadoutContext;
   initialQueue?: NodeQueue;
+  /** 캐치업(현장 개입) 설정 — 미전달 시 판정 완전 불변(옵트인) */
+  catchUp?: import("../data/types").CatchUpConfig;
   postNodeRouting?: (
     node: QueuedNode,
     judgment: ReturnType<typeof resolveNodeJudgment>,
@@ -93,7 +95,9 @@ function mergeTriggered(
 }
 
 export function executeMissionRun(params: MissionRunParams): MissionRunResult {
-  const { mission, merc, loadout, postNodeRouting } = params;
+  const { mission, merc, loadout, postNodeRouting, catchUp } = params;
+  const catchUpActive = !!catchUp && catchUp.interventionNodeNamesKo.length > 0;
+  let catchUpBonusEarned = false;
   const rng = params.rng ?? Math.random;
   const stars = Math.max(1, Math.min(5, mission.difficultyStars || 1));
   const fatiguePerNode = GAME_CONFIG.difficulty.fatiguePerNodeByDifficulty[stars] ?? 3;
@@ -146,6 +150,8 @@ export function executeMissionRun(params: MissionRunParams): MissionRunResult {
   if (!entryBlocked) {
   while (phase === "main" && !queue.isEmpty()) {
     const node = queue.pop()!;
+    const intervened =
+      catchUpActive && catchUp!.interventionNodeNamesKo.includes(node.nameKo);
     const judgment = resolveNodeJudgment({
       stars,
       merc,
@@ -155,10 +161,20 @@ export function executeMissionRun(params: MissionRunParams): MissionRunResult {
       mercenaryTags,
       loadoutTags,
       rng,
+      catchUpPenaltyPercent: intervened ? GAME_CONFIG.catchUp.nodePenaltyPercent : 0,
     });
 
     totalFatigue += fatiguePerNode;
     logs.push(judgment.logKo);
+    if (intervened) {
+      logs.push(
+        `[현장 개입] ${node.nameKo} — 픽서 직접 개입 (부정 확률 +${GAME_CONFIG.catchUp.nodePenaltyPercent}%p).`
+      );
+      if (judgment.outcome === "pass") {
+        catchUpBonusEarned = true;
+        logs.push(`[현장 개입 성공] ${node.nameKo} — 추가 보상 자격 확보.`);
+      }
+    }
     recordTriggeredTags(context, judgment.triggeredTags);
     applySeizureFromTriggered(context, judgment.triggeredTags, judgment.outcome);
 
@@ -172,6 +188,7 @@ export function executeMissionRun(params: MissionRunParams): MissionRunResult {
       triggeredTags: judgment.triggeredTags,
       passChance: judgment.passChance,
       tagPassChanceDelta: judgment.tagPassChanceDelta,
+      intervened,
     });
 
     if (judgment.outcome === "minor") minorFails++;
@@ -310,6 +327,8 @@ export function executeMissionRun(params: MissionRunParams): MissionRunResult {
           : "핵심 목표 미달",
     nodeLogKo: logs,
     nodeResolutions,
+    catchUpBonusEarned: catchUpActive ? catchUpBonusEarned : undefined,
+    catchUpActive: catchUpActive ? true : undefined,
     triggeredTags,
     runContextSnapshot: {
       seizedGearIds: [...context.seizedGearIds],

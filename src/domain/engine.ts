@@ -23,13 +23,15 @@ export function simulateMission(
   mission: Mission,
   merc: Mercenary,
   rng: () => number = Math.random,
-  loadout?: DispatchLoadoutContext
+  loadout?: DispatchLoadoutContext,
+  catchUp?: import("../data/types").CatchUpConfig
 ): SimulationResult {
   const { report, mercSurvived, fatalStatuses } = executeMissionRun({
     mission,
     merc,
     rng,
     loadout,
+    catchUp,
   });
   return { report, mercSurvived, fatalStatuses };
 }

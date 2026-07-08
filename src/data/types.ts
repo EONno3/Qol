@@ -306,6 +306,8 @@ export interface NodeResolutionLog {
   passChance: number;
   /** 태그 해석으로 인한 통과 확률 변동 (%p) */
   tagPassChanceDelta: number;
+  /** 캐치업(현장 개입) 대상 노드였는지 — 서사에 픽서 개입 팩트 전달용 */
+  intervened?: boolean;
 }
 
 export interface MissionRunContext {
@@ -474,6 +476,15 @@ export interface FollowupHook {
   hookSummaryKo: string;
 }
 
+/** 캐치업(현장 개입) 설정 — 실행기 옵트인 파라미터 */
+export interface CatchUpConfig {
+  /** 픽서가 직접 개입할 노드들의 표시 이름(nameKo) 목록 */
+  interventionNodeNamesKo: string[];
+}
+
+/** AI 작전 일지 서사 모드 — 어사인=용병 1인칭 / 캐치업=픽서(관제소) 1인칭 */
+export type NarrativeMode = "merc_diary" | "fixer_field_log";
+
 export interface ResultReport {
   reportId: string;
   missionId: string;
@@ -489,6 +500,10 @@ export interface ResultReport {
   nodeLogKo?: string[];
   /** 구조화 노드 판정 로그 (triggeredTags 포함) */
   nodeResolutions?: NodeResolutionLog[];
+  /** 캐치업 개입 노드가 하나라도 통과해 추가 보상 자격을 얻었는지 (캐치업 미사용 시 undefined) */
+  catchUpBonusEarned?: boolean;
+  /** 캐치업(현장 개입) 모드로 파견되었는지 — UI·서사 모드 분기용 */
+  catchUpActive?: boolean;
   /** 미션 전체 triggeredTags 합집합 — AI 1차 입력 */
   triggeredTags?: TriggeredTag[];
   /** 파견 임시 상태 스냅샷 (압수·플래그 등) */
