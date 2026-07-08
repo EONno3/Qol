@@ -34,6 +34,7 @@ export function createMockMercenary(overrides: Partial<Mercenary> = {}): Mercena
     phase1SummaryKo: "Phase 1 요약",
     phase2SummaryKo: "Phase 2 상세",
     systemTags: [],
+    expectedShareRate: 0.35,
     ...overrides,
   };
 }
@@ -163,6 +164,7 @@ export function createMockGameState(overrides: Partial<GameState> = {}): GameSta
     hiredMercs: [],
     ledger: 10000,
     mercStatuses: {},
+    mercDissatisfactionStacks: {},
     gearStates: {},
     implantStates: {},
     gearOwner: {},

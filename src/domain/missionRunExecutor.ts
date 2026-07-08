@@ -304,13 +304,18 @@ export function executeMissionRun(params: MissionRunParams): MissionRunResult {
 
   const triggeredTags = mergeTriggered([], context.allTriggeredTags);
 
+  const extraRewardCredits =
+    catchUpBonusEarned && reward > 0
+      ? Math.floor(reward * (GAME_CONFIG.catchUp.bonusRewardPercent / 100))
+      : 0;
+
   const report: ResultReport = {
     reportId: `sim_report_${mission.missionId}_${merc.mercId}_${Date.now()}`,
     missionId: mission.missionId,
     mercId: merc.mercId,
     resultType,
     rewardCredits: reward,
-    extraRewardCredits: 0,
+    extraRewardCredits,
     lostCredits: resultType === "success" ? 0 : Math.floor(mission.rewardCredits * 0.3),
     summaryLogKo,
     fulfilledConditionsKo: entryBlocked

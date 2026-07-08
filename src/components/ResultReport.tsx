@@ -2,6 +2,7 @@ import { useState } from "react";
 import { factionName, gearName, implantName, statusName } from "../data/lookups";
 import type { Mercenary, Mission, ResultReport as Report } from "../data/types";
 import { netCredits } from "../domain/settlement";
+import { calcCompensationSplit } from "../domain/mercCompensation";
 import { buildFallbackNarrative } from "../domain/fallbackNarrative";
 import { resultClass, resultTypeLabel, tierClass } from "./labels";
 
@@ -9,11 +10,18 @@ interface Props {
   report: Report;
   mission: Mission;
   merc: Mercenary;
-  onSettle: () => void;
+  onSettle: (mercShareRate: number) => void;
 }
 
 export function ResultReport({ report, mission, merc, onSettle }: Props) {
   const [showDetails, setShowDetails] = useState(false);
+  const defaultSharePercent = Math.round((merc.expectedShareRate ?? 0.35) * 100);
+  const [sharePercent, setSharePercent] = useState(defaultSharePercent);
+  const mercShareRate = sharePercent / 100;
+  const net = netCredits(report);
+  const { fixerCredits, mercCredits } = calcCompensationSplit(net, mercShareRate);
+  const expectedSharePercent = Math.round((merc.expectedShareRate ?? 0.35) * 100);
+  const belowExpected = net > 0 && mercShareRate + 1e-9 < (merc.expectedShareRate ?? 0.35);
   const repairTotal =
     report.gearUpdates.reduce((sum, g) => sum + g.repairCost, 0) +
     report.implantUpdates.reduce((sum, i) => sum + i.repairCost, 0);
@@ -142,11 +150,45 @@ export function ResultReport({ report, mission, merc, onSettle }: Props) {
               <span>{repairTotal.toLocaleString()} cr</span>
             </div>
             <div className="ledger-row net">
-              <span>정산 예정</span>
-              <span>{netCredits(report).toLocaleString()} cr</span>
+              <span>정산 예정 (픽ser 몫)</span>
+              <span>{fixerCredits.toLocaleString()} cr</span>
             </div>
+            {net > 0 && (
+              <div className="ledger-row">
+                <span>용병 지급 예정</span>
+                <span>{mercCredits.toLocaleString()} cr</span>
+              </div>
+            )}
           </div>
         </div>
+
+        {net > 0 && (
+          <div className="report-block" style={{ marginTop: "1rem" }}>
+            <h4>보수 배분</h4>
+            <p className="muted" style={{ marginTop: 0 }}>
+              {merc.aliasKo} 요구 지분: {expectedSharePercent}% · 슬라이더로 이번 정산 지분을 조정한다.
+            </p>
+            <label htmlFor="merc-share-slider" style={{ display: "block", marginBottom: "0.5rem" }}>
+              용병 지분: {sharePercent}%
+            </label>
+            <input
+              id="merc-share-slider"
+              type="range"
+              min={0}
+              max={80}
+              step={5}
+              value={sharePercent}
+              aria-label="용병 보수 배분율"
+              onChange={(e) => setSharePercent(Number(e.target.value))}
+              style={{ width: "100%", maxWidth: "320px" }}
+            />
+            {belowExpected && (
+              <p style={{ color: "var(--amber)", marginTop: "0.5rem", fontSize: "0.9rem" }}>
+                ⚠ 요구 지분 미달 — 정산 시 불만도가 누적될 수 있다.
+              </p>
+            )}
+          </div>
+        )}
 
         {report.statusChanges.length > 0 && (
           <div className="report-block">
@@ -217,7 +259,7 @@ export function ResultReport({ report, mission, merc, onSettle }: Props) {
       </div>
 
       <div className="actions">
-        <button className="primary" onClick={onSettle}>
+        <button className="primary" onClick={() => onSettle(mercShareRate)}>
           정산 처리 및 결과 반영
         </button>
       </div>

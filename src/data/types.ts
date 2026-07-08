@@ -365,6 +365,8 @@ export interface GameState {
   hiredMercs: string[]; // 새로 추가: 고용된 용병 ID 목록
   ledger: number;
   mercStatuses: Record<string, string[]>;
+  /** 용병별 불만도 스택 (D-F). E-9 만족도 이벤트 토대 */
+  mercDissatisfactionStacks: Record<string, number>;
   gearStates: Record<string, GearStateValue>;
   implantStates: Record<string, GearStateValue>;
   gearOwner: Record<string, string>; // 새로 추가: 장비 ID별 소유 용병 ID 매핑
@@ -421,6 +423,8 @@ export interface Mercenary {
   systemTags: string[];
   /** 이야기 태그 — 판정 직결 없음, 서사·이벤트용 (이야기 태그 규칙.md) */
   storyTags?: string[];
+  /** 용병 요구 보수 지분 (0~1). 정산 시 미달하면 불만도 누적 (D-F) */
+  expectedShareRate?: number;
 }
 
 export type SignalType = "advantage" | "disadvantage" | "conditional" | "unknown";

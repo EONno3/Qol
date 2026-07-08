@@ -318,6 +318,7 @@ export const mercenaries: Mercenary[] = [
       "▶ [분석] 강점: 낡은 산업 설비 and 전력 계통 앞에서 비정상적일 정도로 침착함. 위험: 귀찮은 보안 절차를 몽땅 건너뛰는 고질적인 버릇이 있음.",
     phase2SummaryKo: "▶ [태그] 고압망_작업, 슬럼_출신, 절연_장비_작업_습관, 감전_잔향_상태.",
     systemTags: ["tag_operation_high_voltage_grid_tech", "tag_origin_slum_native"],
+    expectedShareRate: 0.3,
   },
   {
     mercId: "merc_malt_01",
@@ -334,6 +335,7 @@ export const mercenaries: Mercenary[] = [
       "▶ [분석] 강점: 군중 속에 녹아드는 동선, 보안 직원의 패턴 판독에 최적화됨. 위험: 유흥가 지하에 오래된 채무 관계가 얽혀 있어 돌발 빚쟁이와 조우할 확률 높음.",
     phase2SummaryKo: "▶ [태그] 유흥가_출신, 민간인_위장, 스캐너_기만, 은닉_슬롯, 채무_그림자.",
     systemTags: ["tag_origin_nightlife_worker"],
+    expectedShareRate: 0.35,
   },
   {
     mercId: "merc_velvet_knife_01",
@@ -350,6 +352,7 @@ export const mercenaries: Mercenary[] = [
       "▶ [분석] 강점: 고압적인 기업 임원의 시선 검사를 우습게 넘기며, 격식 공간에서 행동 노이즈 0%. 위험: 전신 반사면 앞에서는 자기애적 강박으로 인한 미세 반응 지연 현상 발견.",
     phase2SummaryKo: "▶ [태그] 상층_예법, 유전자_기만, 단정한_인상, 반사면_지연_반응.",
     systemTags: ["tag_origin_upper_etiquette"],
+    expectedShareRate: 0.45,
   },
   {
     mercId: "merc_chromeshow_01",
@@ -366,6 +369,7 @@ export const mercenaries: Mercenary[] = [
       "▶ [분석] 강점: 정면 충돌과 초근접 교전에서는 무적에 가까움. 위험: 장비 노출도가 극도로 높아 은밀한 침투 작전에서는 걸어 다니는 사이렌 수준. 대기 명령 불복종 빈번.",
     phase2SummaryKo: "▶ [태그] 불법_격투장_출신, 노출형_크롬, 고출력_산탄_암, 감전_과민, 명령_불복종.",
     systemTags: ["tag_origin_illegal_arena"],
+    expectedShareRate: 0.4,
   },
 ];
 

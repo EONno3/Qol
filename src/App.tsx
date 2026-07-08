@@ -324,9 +324,14 @@ export function App({ initialState, bypassTitle = false }: { initialState?: Game
     });
   }
 
-  function handleSettle() {
-    if (report) {
-      setState((s) => applySettlement(s, report));
+  function handleSettle(mercShareRate: number) {
+    if (report && selectedMerc) {
+      setState((s) =>
+        applySettlement(s, report, {
+          mercShareRate,
+          mercExpectedShareRate: selectedMerc.expectedShareRate ?? 0.35,
+        }),
+      );
     }
     setScreen("settled");
   }

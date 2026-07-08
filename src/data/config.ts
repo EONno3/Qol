@@ -30,6 +30,8 @@ export const GAME_CONFIG = {
       mid: -25,
       upper: -30,
     },
+    /** 기대 지분 대비 1%p 미달당 불만도 스택 (D-F) */
+    dissatisfactionPerPercentShortfall: 1,
   },
   // 미션 난이도 밸런스
   difficulty: {
@@ -50,6 +52,7 @@ export const GAME_CONFIG = {
     costMultiplier: 1.5, // 지휘력 코스트 배수 (올림 적용)
     nodePenaltyPercent: 15, // 개입 노드 부정 확률 +15%p (통과 확률 -15)
     interventionRatio: 0.3, // 최대 개입 노드 비율 (ceil)
+    bonusRewardPercent: 15, // 개입 노드 통과 + 보상 발생 시 extraRewardCredits 가산 (%)
   },
   // AI 관련 밸런스
   ai: {

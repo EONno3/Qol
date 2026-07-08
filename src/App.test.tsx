@@ -64,9 +64,8 @@ describe("App 1턴 루프", () => {
     });
 
     const panel = screen.getByText("스테이션 상태").closest("aside")!;
-    // 상실자 초기 잔고 3,000 cr + 미션 순이익 14,300 cr (16,500 - 2,200) = 17,300 cr
-    // 상실자 초기 잔고 + 미션 성공 보상 16,500 cr (성공 시 손실 0 cr)
-    const expectedCredits = GAME_CONFIG.originCredits.상실자 + 16500;
+    // 상실자 초기 30,000 cr + 차단기 기본 지분 30% → 픽ser 몫 70% of 16,500 = 11,550
+    const expectedCredits = GAME_CONFIG.originCredits.상실자 + Math.floor(16500 * 0.7);
     expect(within(panel).getByText(`${expectedCredits.toLocaleString()} cr`)).toBeInTheDocument();
     randomSpy.mockRestore();
   });

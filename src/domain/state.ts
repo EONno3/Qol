@@ -214,6 +214,7 @@ export function createInitialState(): GameState {
     hiredMercs: ["merc_breaker_01", "merc_velvet_knife_01"], // 초기 용병 2명
     ledger: 0,
     mercStatuses: structuredClone(initialMercStatuses),
+    mercDissatisfactionStacks: {},
     gearStates: {
       gear_feet_insulated_boots_01: "normal",
       gear_wrist_auth_bypass_bracelet_01: "normal",

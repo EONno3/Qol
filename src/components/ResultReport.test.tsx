@@ -33,6 +33,7 @@ const mockMerc: Mercenary = {
   phase0ProfileKo: "프로필",
   phase1SummaryKo: "분석",
   phase2SummaryKo: "태그",
+  expectedShareRate: 0.4,
 };
 
 const baseReport: Report = {
@@ -202,5 +203,33 @@ describe("ResultReport 캐치업 UI (T-DC-UI-NARR)", () => {
 
     expect(screen.getByText("현장 보고 (용병 일지)")).toBeInTheDocument();
     expect(screen.queryByText("현장 개입 기록 (관제소 로그)")).not.toBeInTheDocument();
+  });
+});
+
+describe("ResultReport 보수 배분 UI (T-DF-UI)", () => {
+  it("T-DF-UI-1: 기본 슬라이더가 용병 요구 지분(40%)으로 초기화된다", () => {
+    render(
+      <ResultReport report={baseReport} mission={mockMission} merc={mockMerc} onSettle={vi.fn()} />
+    );
+    expect(screen.getByLabelText("용병 보수 배분율")).toHaveValue("40");
+    expect(screen.getByText(/요구 지분: 40%/)).toBeInTheDocument();
+  });
+
+  it("T-DF-UI-2: 정산 클릭 시 선택 지분을 onSettle에 전달한다", () => {
+    const onSettle = vi.fn();
+    render(
+      <ResultReport report={baseReport} mission={mockMission} merc={mockMerc} onSettle={onSettle} />
+    );
+    fireEvent.change(screen.getByLabelText("용병 보수 배분율"), { target: { value: "25" } });
+    fireEvent.click(screen.getByRole("button", { name: "정산 처리 및 결과 반영" }));
+    expect(onSettle).toHaveBeenCalledWith(0.25);
+  });
+
+  it("T-DF-UI-3: 요구 지분 미달 시 경고 문구를 표시한다", () => {
+    render(
+      <ResultReport report={baseReport} mission={mockMission} merc={mockMerc} onSettle={vi.fn()} />
+    );
+    fireEvent.change(screen.getByLabelText("용병 보수 배분율"), { target: { value: "25" } });
+    expect(screen.getByText(/불만도가 누적/)).toBeInTheDocument();
   });
 });
