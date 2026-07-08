@@ -1,5 +1,6 @@
 import type { GameState } from "./state";
 import { missions } from "../data/seed";
+import { tickAnalysisSlotsOnTurnAdvance } from "./analysisSlot";
 
 /**
  * 다음 날로 넘어가기 (Advance Turn)
@@ -42,5 +43,6 @@ export function advanceTurn(state: GameState): GameState {
     currentCommandPoints: state.maxCommandPoints,
     ledger: state.ledger - maintenanceCost, // 빚(마이너스) 허용
     availableMissions: newAvailableMissions,
+    analysisSlots: tickAnalysisSlotsOnTurnAdvance(state),
   };
 }

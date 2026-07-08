@@ -1,5 +1,6 @@
 import { missions, generatedMissions, qaMissions } from "../data/seed";
 import { GAME_CONFIG } from "../data/config";
+import { createEmptyAnalysisSlots } from "./analysisSlot";
 import type {
   FixerOrigin,
   FixerProfile,
@@ -215,6 +216,7 @@ export function createInitialState(): GameState {
     ledger: 0,
     mercStatuses: structuredClone(initialMercStatuses),
     mercDissatisfactionStacks: {},
+    analysisSlots: createEmptyAnalysisSlots(),
     gearStates: {
       gear_feet_insulated_boots_01: "normal",
       gear_wrist_auth_bypass_bracelet_01: "normal",

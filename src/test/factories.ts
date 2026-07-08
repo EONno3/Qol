@@ -6,6 +6,7 @@
  * - seed.ts / 실제 GameState에 의존하지 않으므로 스위트 간 상태 오염이 없다.
  */
 
+import { createEmptyAnalysisSlots } from "../domain/analysisSlot";
 import type {
   GameState,
   Mercenary,
@@ -165,6 +166,7 @@ export function createMockGameState(overrides: Partial<GameState> = {}): GameSta
     ledger: 10000,
     mercStatuses: {},
     mercDissatisfactionStacks: {},
+    analysisSlots: createEmptyAnalysisSlots(),
     gearStates: {},
     implantStates: {},
     gearOwner: {},

@@ -2,10 +2,16 @@ import { render, screen, fireEvent } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 import { StationView } from "./StationView";
 import { createMockGameState, createMockStationState } from "../test/factories";
+import { createEmptyAnalysisSlots } from "../domain/analysisSlot";
 import { getUpgradeCost } from "../domain/station";
 
 // StationView는 seed.ts의 mercenaries를 내부에서 불러와 고용 목록을 렌더링한다.
 // hiredMercs를 비워 seed 용병이 노출되지 않는 독립 환경에서 UI 분기를 검증한다.
+
+const noopSlotHandlers = {
+  onAssignMercSlot: vi.fn(),
+  onAssignMissionSlot: vi.fn(),
+};
 
 function renderStation(overrides: Partial<Parameters<typeof StationView>[0]> = {}) {
   const state = createMockGameState({
@@ -20,6 +26,7 @@ function renderStation(overrides: Partial<Parameters<typeof StationView>[0]> = {
       onHire={vi.fn()}
       onFire={vi.fn()}
       onReplaceGear={vi.fn()}
+      {...noopSlotHandlers}
       {...overrides}
     />
   );
@@ -35,6 +42,7 @@ describe("StationView 컴포넌트 단위 테스트", () => {
         onHire={vi.fn()}
         onFire={vi.fn()}
         onReplaceGear={vi.fn()}
+        {...noopSlotHandlers}
       />
     );
     expect(screen.getByText(/아직 스테이션 정보가 없습니다/)).toBeInTheDocument();
@@ -60,6 +68,7 @@ describe("StationView 컴포넌트 단위 테스트", () => {
         onHire={vi.fn()}
         onFire={vi.fn()}
         onReplaceGear={vi.fn()}
+        {...noopSlotHandlers}
       />
     );
     const btn = screen.getByRole("button", { name: "업그레이드 진행" });
@@ -81,6 +90,7 @@ describe("StationView 컴포넌트 단위 테스트", () => {
         onHire={vi.fn()}
         onFire={vi.fn()}
         onReplaceGear={vi.fn()}
+        {...noopSlotHandlers}
       />
     );
     expect(screen.getByRole("button", { name: "업그레이드 진행" })).toBeDisabled();
@@ -96,5 +106,62 @@ describe("StationView 컴포넌트 단위 테스트", () => {
     renderStation();
     fireEvent.click(screen.getByText("암시장(무기 재수급)"));
     expect(screen.getByText("장비가 파괴된 용병이 없습니다.")).toBeInTheDocument();
+  });
+
+  describe("분석 기관 탭 (T-DE-UI)", () => {
+    it("T-DE-UI-1: 분석 기관 탭에서 용병·미션 슬롯 select가 렌더링된다", () => {
+      renderStation();
+      fireEvent.click(screen.getByText("분석 기관"));
+      expect(screen.getByLabelText("용병 분석 슬롯")).toBeInTheDocument();
+      expect(screen.getByLabelText("미션 분석 슬롯")).toBeInTheDocument();
+    });
+
+    it("T-DE-UI-2: 용병 슬롯 선택 시 onAssignMercSlot 콜백 호출", () => {
+      const onAssignMercSlot = vi.fn();
+      const state = createMockGameState({
+        hiredMercs: ["merc_breaker_01"],
+        stationState: createMockStationState({ analysisMercLv: 0 }),
+      });
+      render(
+        <StationView
+          state={state}
+          onUpgrade={vi.fn()}
+          onHire={vi.fn()}
+          onFire={vi.fn()}
+          onReplaceGear={vi.fn()}
+          onAssignMercSlot={onAssignMercSlot}
+          onAssignMissionSlot={vi.fn()}
+        />
+      );
+      fireEvent.click(screen.getByText("분석 기관"));
+      fireEvent.change(screen.getByLabelText("용병 분석 슬롯"), {
+        target: { value: "merc_breaker_01" },
+      });
+      expect(onAssignMercSlot).toHaveBeenCalledWith("merc_breaker_01");
+    });
+
+    it("T-DE-UI-3: 슬롯 배치 중 bonusLevel·effective 표시", () => {
+      const state = createMockGameState({
+        stationState: createMockStationState({ analysisMercLv: 0, analysisMissionLv: 1 }),
+        analysisSlots: {
+          merc: { targetId: "merc_breaker_01", bonusLevel: 1 },
+          mission: createEmptyAnalysisSlots().mission,
+        },
+        hiredMercs: ["merc_breaker_01"],
+      });
+      render(
+        <StationView
+          state={state}
+          onUpgrade={vi.fn()}
+          onHire={vi.fn()}
+          onFire={vi.fn()}
+          onReplaceGear={vi.fn()}
+          {...noopSlotHandlers}
+        />
+      );
+      fireEvent.click(screen.getByText("분석 기관"));
+      expect(screen.getByText(/슬롯 보너스 \+1/)).toBeInTheDocument();
+      expect(screen.getByText(/effective Lv\.\s*1/)).toBeInTheDocument();
+    });
   });
 });

@@ -2,7 +2,8 @@ import { useState } from "react";
 import type { GameState } from "../domain/state";
 import { getUpgradeCost, getUpgradedStation, getHiringCost, getReplacementCost } from "../domain/station";
 import { mercenaries as allMercs } from "../data/seed";
-import { getMercenary } from "../data/lookups";
+import { getMercenary, getMission } from "../data/lookups";
+import { effectiveMercAnalysisLevel, effectiveMissionAnalysisLevel } from "../domain/analysisSlot";
 import { STATUS_GEAR_DESTROYED, STATUS_GEAR_DESTROYED_JOKER, TIER_LABEL_KO } from "../data/constants";
 
 interface Props {
@@ -11,10 +12,20 @@ interface Props {
   onHire: (mercId: string) => void;
   onFire: (mercId: string) => void;
   onReplaceGear: (mercId: string) => void;
+  onAssignMercSlot: (mercId: string | null) => void;
+  onAssignMissionSlot: (missionId: string | null) => void;
 }
 
-export function StationView({ state, onUpgrade, onHire, onFire, onReplaceGear }: Props) {
-  const [activeTab, setActiveTab] = useState<"infra" | "market" | "black_market">("infra");
+export function StationView({
+  state,
+  onUpgrade,
+  onHire,
+  onFire,
+  onReplaceGear,
+  onAssignMercSlot,
+  onAssignMissionSlot,
+}: Props) {
+  const [activeTab, setActiveTab] = useState<"infra" | "analysis" | "market" | "black_market">("infra");
   const station = state.stationState;
 
   if (!station) {
@@ -37,6 +48,9 @@ export function StationView({ state, onUpgrade, onHire, onFire, onReplaceGear }:
   const hiredIds = state.hiredMercs || [];
   const hiredMercs = hiredIds.map(id => getMercenary(id)).filter(Boolean) as typeof allMercs;
   const availableMarketMercs = allMercs.filter(m => !hiredIds.includes(m.mercId));
+  const missionSlotCandidates = [...new Set([...state.availableMissions, ...state.acceptedMissions])];
+  const mercSlot = state.analysisSlots.merc;
+  const missionSlot = state.analysisSlots.mission;
 
   return (
     <section className="station-view">
@@ -51,6 +65,13 @@ export function StationView({ state, onUpgrade, onHire, onFire, onReplaceGear }:
           style={{ background: "none", border: "none", color: activeTab === "infra" ? "var(--cyan)" : "var(--muted)", fontWeight: activeTab === "infra" ? "bold" : "normal", cursor: "pointer", fontSize: "1.1rem" }}
         >
           인프라 관리
+        </button>
+        <button 
+          className={`tab-btn ${activeTab === "analysis" ? "active" : ""}`}
+          onClick={() => setActiveTab("analysis")}
+          style={{ background: "none", border: "none", color: activeTab === "analysis" ? "var(--cyan)" : "var(--muted)", fontWeight: activeTab === "analysis" ? "bold" : "normal", cursor: "pointer", fontSize: "1.1rem" }}
+        >
+          분석 기관
         </button>
         <button 
           className={`tab-btn ${activeTab === "market" ? "active" : ""}`}
@@ -131,6 +152,76 @@ export function StationView({ state, onUpgrade, onHire, onFire, onReplaceGear }:
               >
                 업그레이드 진행
               </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {activeTab === "analysis" && (
+        <div className="tab-content">
+          <p className="muted" style={{ marginBottom: "1rem" }}>
+            용병·미션 분석 기관에 각 1개씩 배치하면 턴이 지날 때마다 해당 대상의 분석 깊이가 임시로 +1됩니다 (최대 Lv.2).
+            슬롯에서 빼면 보너스는 즉시 사라집니다.
+          </p>
+
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1.5rem" }}>
+            <div className="station-card" style={{ background: "var(--panel-2)", padding: "1.25rem", border: "1px solid var(--panel-3)" }}>
+              <h3 style={{ marginTop: 0, color: "var(--cyan)" }}>용병 분석 슬롯</h3>
+              <p className="muted" style={{ fontSize: "0.9rem" }}>
+                기관 베이스 Lv.{station.analysisMercLv}
+                {mercSlot.targetId && (
+                  <> · 슬롯 보너스 +{mercSlot.bonusLevel} → effective Lv.
+                  {effectiveMercAnalysisLevel(state, mercSlot.targetId)}</>
+                )}
+              </p>
+              <label htmlFor="merc-analysis-slot" className="muted" style={{ display: "block", marginTop: "0.75rem" }}>
+                배치 용병
+              </label>
+              <select
+                id="merc-analysis-slot"
+                aria-label="용병 분석 슬롯"
+                value={mercSlot.targetId ?? ""}
+                onChange={(e) => onAssignMercSlot(e.target.value || null)}
+                style={{ width: "100%", marginTop: "0.25rem" }}
+              >
+                <option value="">(비움)</option>
+                {hiredMercs.map((m) => (
+                  <option key={m.mercId} value={m.mercId}>
+                    {m.aliasKo}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div className="station-card" style={{ background: "var(--panel-2)", padding: "1.25rem", border: "1px solid var(--panel-3)" }}>
+              <h3 style={{ marginTop: 0, color: "var(--cyan)" }}>미션 분석 슬롯</h3>
+              <p className="muted" style={{ fontSize: "0.9rem" }}>
+                기관 베이스 Lv.{station.analysisMissionLv}
+                {missionSlot.targetId && (
+                  <> · 슬롯 보너스 +{missionSlot.bonusLevel} → effective Lv.
+                  {effectiveMissionAnalysisLevel(state, missionSlot.targetId)}</>
+                )}
+              </p>
+              <label htmlFor="mission-analysis-slot" className="muted" style={{ display: "block", marginTop: "0.75rem" }}>
+                배치 미션
+              </label>
+              <select
+                id="mission-analysis-slot"
+                aria-label="미션 분석 슬롯"
+                value={missionSlot.targetId ?? ""}
+                onChange={(e) => onAssignMissionSlot(e.target.value || null)}
+                style={{ width: "100%", marginTop: "0.25rem" }}
+              >
+                <option value="">(비움)</option>
+                {missionSlotCandidates.map((id) => {
+                  const m = getMission(id);
+                  return (
+                    <option key={id} value={id}>
+                      {m?.displayNameKo ?? id}
+                    </option>
+                  );
+                })}
+              </select>
             </div>
           </div>
         </div>

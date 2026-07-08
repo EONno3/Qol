@@ -3,15 +3,17 @@ interface Props {
   acceptedCount: number;
   activeCount: number;
   completedCount: number;
-  mercAnalysisLevel: number;
-  missionAnalysisLevel: number;
+  stationMercBase: number;
+  stationMissionBase: number;
+  mercSlotTargetId: string | null;
+  missionSlotTargetId: string | null;
+  mercSlotBonus: number;
+  missionSlotBonus: number;
   onGoBoard: () => void;
   onGoAccepted: () => void;
   onGoDesk: () => void;
   onGoStation: () => void;
   onResetGame: () => void;
-  onMercLevel: (level: number) => void;
-  onMissionLevel: (level: number) => void;
 }
 
 export function Sidebar({
@@ -19,18 +21,18 @@ export function Sidebar({
   acceptedCount,
   activeCount,
   completedCount,
-  mercAnalysisLevel,
-  missionAnalysisLevel,
+  stationMercBase,
+  stationMissionBase,
+  mercSlotTargetId,
+  missionSlotTargetId,
+  mercSlotBonus,
+  missionSlotBonus,
   onGoBoard,
   onGoAccepted,
   onGoDesk,
   onGoStation,
   onResetGame,
-  onMercLevel,
-  onMissionLevel,
 }: Props) {
-  const effective = Math.min(mercAnalysisLevel, missionAnalysisLevel);
-
   return (
     <nav className="sidebar">
       <div className="sidebar-brand">
@@ -68,30 +70,28 @@ export function Sidebar({
       </ul>
 
       <div className="sidebar-analysis">
-        <div className="sidebar-section-label">분석소 레벨</div>
-        <label>
-          용병 분석
-          <select
-            value={mercAnalysisLevel}
-            onChange={(e) => onMercLevel(Number(e.target.value))}
-          >
-            <option value={0}>Lv.0</option>
-            <option value={1}>Lv.1</option>
-            <option value={2}>Lv.2</option>
-          </select>
-        </label>
-        <label>
-          미션 분석
-          <select
-            value={missionAnalysisLevel}
-            onChange={(e) => onMissionLevel(Number(e.target.value))}
-          >
-            <option value={0}>Lv.0</option>
-            <option value={1}>Lv.1</option>
-            <option value={2}>Lv.2</option>
-          </select>
-        </label>
-        <div className="sidebar-effective">노출 적용 Lv.{effective} (min 규칙)</div>
+        <div className="sidebar-section-label">분석 기관 (베이스)</div>
+        <div className="muted" style={{ fontSize: "0.9rem", lineHeight: 1.5 }}>
+          용병 Lv.{stationMercBase}
+          {mercSlotTargetId && (
+            <span style={{ color: "var(--cyan)" }}>
+              {" "}
+              · 슬롯 +{mercSlotBonus}
+            </span>
+          )}
+        </div>
+        <div className="muted" style={{ fontSize: "0.9rem", lineHeight: 1.5, marginTop: "0.25rem" }}>
+          미션 Lv.{stationMissionBase}
+          {missionSlotTargetId && (
+            <span style={{ color: "var(--cyan)" }}>
+              {" "}
+              · 슬롯 +{missionSlotBonus}
+            </span>
+          )}
+        </div>
+        <div className="sidebar-effective" style={{ marginTop: "0.5rem" }}>
+          슬롯 배치는 스테이션 「분석 기관」 탭에서 설정
+        </div>
       </div>
     </nav>
   );

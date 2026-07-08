@@ -8,6 +8,14 @@ import { createInitialState, type GameState } from "./domain/state";
 import { weightMissions } from "./domain/world";
 import { clearGame, loadGame, saveGame } from "./domain/storage";
 import { advanceTurn } from "./domain/turn";
+import {
+  assignMercAnalysisSlot,
+  assignMissionAnalysisSlot,
+  createEmptyAnalysisSlots,
+  effectiveMercAnalysisLevel,
+  effectiveMissionAnalysisLevel,
+  getStationMercAnalysisBase,
+} from "./domain/analysisSlot";
 import { GAME_CONFIG } from "./data/config";
 import { buildNarratorWorldState } from "./domain/worldStateExport";
 import { buildNarratePayload } from "./domain/narratePayload";
@@ -83,6 +91,13 @@ export function App({ initialState, bypassTitle = false }: { initialState?: Game
         aiNarratorEnabled: GAME_CONFIG.ai.aiNarratorEnabled
       };
     }
+    // 호환성 패치 5: analysisSlots가 없는 구버전 세이브 복구
+    if (!loadedState.analysisSlots) {
+      loadedState = {
+        ...loadedState,
+        analysisSlots: createEmptyAnalysisSlots(),
+      };
+    }
     return loadedState;
   });
 
@@ -95,8 +110,6 @@ export function App({ initialState, bypassTitle = false }: { initialState?: Game
   const shouldBypass = bypassTitle || isTestEnv;
   const [screen, setScreen] = useState<Screen>(() => shouldBypass ? "board" : "title");
 
-  const [mercAnalysisLevel, setMercAnalysisLevel] = useState(2);
-  const [missionAnalysisLevel, setMissionAnalysisLevel] = useState(2);
   const [selectedMissionId, setSelectedMissionId] = useState<string | null>(null);
   const [selectedMercId, setSelectedMercId] = useState<string | null>(null);
   const [report, setReport] = useState<Report | null>(null);
@@ -426,15 +439,17 @@ export function App({ initialState, bypassTitle = false }: { initialState?: Game
           acceptedCount={state.acceptedMissions.length}
           activeCount={state.activeDispatches.length}
           completedCount={state.completedDispatches.length}
-          mercAnalysisLevel={mercAnalysisLevel}
-          missionAnalysisLevel={missionAnalysisLevel}
+          stationMercBase={state.stationState?.analysisMercLv ?? 0}
+          stationMissionBase={state.stationState?.analysisMissionLv ?? 0}
+          mercSlotTargetId={state.analysisSlots.merc.targetId}
+          missionSlotTargetId={state.analysisSlots.mission.targetId}
+          mercSlotBonus={state.analysisSlots.merc.bonusLevel}
+          missionSlotBonus={state.analysisSlots.mission.bonusLevel}
           onGoBoard={() => setScreen("board")}
           onGoAccepted={() => setScreen("accepted")}
           onGoDesk={() => setScreen("desk")}
           onGoStation={() => setScreen("station")}
           onResetGame={handleResetGame}
-          onMercLevel={setMercAnalysisLevel}
-          onMissionLevel={setMissionAnalysisLevel}
         />
 
       <main className="main">
@@ -443,19 +458,23 @@ export function App({ initialState, bypassTitle = false }: { initialState?: Game
         )}
 
         {screen === "station" && (
-          <StationView 
-            state={state} 
-            onUpgrade={handleUpgradeStation} 
-            onHire={(mercId) => setState(s => hireMercenary(s, mercId))}
-            onFire={(mercId) => setState(s => fireMercenary(s, mercId))}
-            onReplaceGear={(mercId) => setState(s => replaceDestroyedGear(s, mercId))}
+          <StationView
+            state={state}
+            onUpgrade={handleUpgradeStation}
+            onHire={(mercId) => setState((s) => hireMercenary(s, mercId))}
+            onFire={(mercId) => setState((s) => fireMercenary(s, mercId))}
+            onReplaceGear={(mercId) => setState((s) => replaceDestroyedGear(s, mercId))}
+            onAssignMercSlot={(mercId) => setState((s) => assignMercAnalysisSlot(s, mercId))}
+            onAssignMissionSlot={(missionId) =>
+              setState((s) => assignMissionAnalysisSlot(s, missionId))
+            }
           />
         )}
 
         {screen === "detail" && selectedMission && (
           <MissionDetail
             mission={selectedMission}
-            analysisLevel={missionAnalysisLevel}
+            analysisLevel={effectiveMissionAnalysisLevel(state, selectedMission.missionId)}
             onAccept={handleAccept}
             onBack={() => setScreen("board")}
           />
@@ -468,9 +487,13 @@ export function App({ initialState, bypassTitle = false }: { initialState?: Game
         {screen === "matching" && selectedMission && (
           <MercMatching
             mission={selectedMission}
-            mercenaries={allMercs.filter(m => state.hiredMercs?.includes(m.mercId))}
-            mercAnalysisLevel={mercAnalysisLevel}
-            missionAnalysisLevel={missionAnalysisLevel}
+            mercenaries={allMercs.filter((m) => state.hiredMercs?.includes(m.mercId))}
+            mercAnalysisLevel={
+              selectedMercId
+                ? effectiveMercAnalysisLevel(state, selectedMercId)
+                : getStationMercAnalysisBase(state)
+            }
+            missionAnalysisLevel={effectiveMissionAnalysisLevel(state, selectedMission.missionId)}
             selectedMercId={selectedMercId}
             currentCommandPoints={state.currentCommandPoints}
             busyMercIds={[...state.activeDispatches, ...state.completedDispatches].map(d => d.mercId)}

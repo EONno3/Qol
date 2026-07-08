@@ -356,6 +356,16 @@ export interface Mission {
   entryGate?: EntryGateSpec;
 }
 
+export interface AnalysisSlotEntry {
+  targetId: string | null;
+  bonusLevel: number;
+}
+
+export interface AnalysisSlotsState {
+  merc: AnalysisSlotEntry;
+  mission: AnalysisSlotEntry;
+}
+
 export interface GameState {
   // 기존 필드 (변경 없음)
   availableMissions: string[];
@@ -367,6 +377,8 @@ export interface GameState {
   mercStatuses: Record<string, string[]>;
   /** 용병별 불만도 스택 (D-F). E-9 만족도 이벤트 토대 */
   mercDissatisfactionStacks: Record<string, number>;
+  /** 액티브 분석 슬롯 — 용병·미션 기관 각 1칸 (D-E) */
+  analysisSlots: AnalysisSlotsState;
   gearStates: Record<string, GearStateValue>;
   implantStates: Record<string, GearStateValue>;
   gearOwner: Record<string, string>; // 새로 추가: 장비 ID별 소유 용병 ID 매핑
