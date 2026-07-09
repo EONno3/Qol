@@ -16,6 +16,8 @@ describe("Station Logic", () => {
       stationId: "st1",
       fixerId: "f1",
       category: "업무",
+      facilityId: "work_signal_relay",
+      facilityTier: 1,
       facilityName: "Test",
       locationTier: "중층",
       locationArea: "Test Area",
@@ -40,6 +42,8 @@ describe("Station Logic", () => {
       stationId: "st1",
       fixerId: "f1",
       category: "업무",
+      facilityId: "work_signal_relay",
+      facilityTier: 1,
       facilityName: "Test",
       locationTier: "중층",
       locationArea: "Test Area",
@@ -53,7 +57,7 @@ describe("Station Logic", () => {
     expect(next.ledger).toBe(5000); // (cost + 5000) - cost
     expect(next.stationState?.level).toBe(2);
     expect(next.stationState?.operatingCostPerTurn).toBe(Math.pow(2, 2) * GAME_CONFIG.station.operatingCostBaseMultiplier);
-    expect(next.stationState?.analysisMercLv).toBe(1);
+    expect(next.stationState?.analysisMercLv).toBe(0);
     expect(next.maxCommandPoints).toBe(6);
     expect(next.currentCommandPoints).toBe(6);
   });

@@ -3,6 +3,7 @@ import type { CatchUpConfig } from "../data/types";
 import { allMissions, mercenaries, gearDefs, implantDefs } from "../data/seed";
 import { GAME_CONFIG } from "../data/config";
 import { simulateMission } from "./engine";
+import { getStationModifiers } from "./stationModifiers";
 
 export interface StartDispatchOptions {
   /** 캐치업(현장 개입) 설정. 지정 시 코스트 ×1.5(올림) + 개입 노드 판정 페널티 반영 */
@@ -18,6 +19,18 @@ export function acceptMission(state: GameState, missionId: string): GameState {
     availableMissions: state.availableMissions.filter((id) => id !== missionId),
     acceptedMissions: [missionId, ...state.acceptedMissions],
   };
+}
+
+export function computeDispatchCommandCost(
+  state: GameState,
+  baseMercCommandCost: number,
+  catchUpActive: boolean,
+): number {
+  let cost = catchUpActive
+    ? Math.ceil(baseMercCommandCost * GAME_CONFIG.catchUp.costMultiplier)
+    : baseMercCommandCost;
+  const { dispatchCommandDiscount } = getStationModifiers(state);
+  return Math.max(1, cost - dispatchCommandDiscount);
 }
 
 export function startDispatch(
@@ -40,9 +53,7 @@ export function startDispatch(
   const catchUpActive =
     !!options?.catchUp && options.catchUp.interventionNodeNamesKo.length > 0;
   const baseCost = mercDef.commandCost ?? 0;
-  const cost = catchUpActive
-    ? Math.ceil(baseCost * GAME_CONFIG.catchUp.costMultiplier)
-    : baseCost;
+  const cost = computeDispatchCommandCost(state, baseCost, catchUpActive);
 
   if (state.currentCommandPoints < cost) {
     return state; // 통제력 부족
@@ -59,6 +70,7 @@ export function startDispatch(
   };
 
   // 파견 시작 시 시뮬레이션 돌려서 생성된 결과를 상태에 저장해 둠
+  const { fatigueMultiplier } = getStationModifiers(state);
   const simulationResult = simulateMission(
     missionDef,
     mercDef,
@@ -69,7 +81,8 @@ export function startDispatch(
       gearDefs,
       implantDefs,
     },
-    catchUpActive ? options!.catchUp : undefined
+    catchUpActive ? options!.catchUp : undefined,
+    fatigueMultiplier,
   );
   const newGeneratedReports = { ...state.generatedReports };
   newGeneratedReports[dispatchId] = simulationResult.report;

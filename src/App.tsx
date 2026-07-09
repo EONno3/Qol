@@ -34,8 +34,8 @@ import { ResultReport } from "./components/ResultReport";
 import { Sidebar } from "./components/Sidebar";
 import { StatePanel } from "./components/StatePanel";
 import { StationView } from "./components/StationView";
-import { upgradeStation, hireMercenary, fireMercenary, replaceDestroyedGear } from "./domain/station";
-import { createDefaultStation } from "./domain/state";
+import { upgradeStation, hireMercenary, fireMercenary, replaceDestroyedGear, upgradeFacilityTier } from "./domain/station";
+import { createDefaultStation, migrateLegacyStationState } from "./domain/state";
 import { TitleScreen } from "./components/TitleScreen";
 
 
@@ -96,6 +96,13 @@ export function App({ initialState, bypassTitle = false }: { initialState?: Game
       loadedState = {
         ...loadedState,
         analysisSlots: createEmptyAnalysisSlots(),
+      };
+    }
+    // 호환성 패치 6: facilityId/facilityTier 누락 구세이브 보강
+    if (loadedState.stationState && !loadedState.stationState.facilityId) {
+      loadedState = {
+        ...loadedState,
+        stationState: migrateLegacyStationState(loadedState.stationState),
       };
     }
     return loadedState;
@@ -424,7 +431,7 @@ export function App({ initialState, bypassTitle = false }: { initialState?: Game
               ...s.factionReputation,
               ...result.factionReputation,
             },
-            stationState: createDefaultStation(result.profile.fixerId),
+            stationState: createDefaultStation(result.profile.fixerId, result.stationCategory),
           }));
           setScreen("station"); // 역 추가: 캐릭터 생성 후 스테이션 화면으로 먼저 이동
         }}
@@ -461,6 +468,7 @@ export function App({ initialState, bypassTitle = false }: { initialState?: Game
           <StationView
             state={state}
             onUpgrade={handleUpgradeStation}
+            onUpgradeFacility={() => setState((s) => upgradeFacilityTier(s))}
             onHire={(mercId) => setState((s) => hireMercenary(s, mercId))}
             onFire={(mercId) => setState((s) => fireMercenary(s, mercId))}
             onReplaceGear={(mercId) => setState((s) => replaceDestroyedGear(s, mercId))}

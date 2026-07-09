@@ -7,8 +7,13 @@ import type {
   GameState,
   MissionTypeKey,
   PlayerBehavioralStats,
+  StationCategory,
   StationState,
 } from "../data/types";
+import {
+  DEFAULT_FACILITY_BY_CATEGORY,
+  FACILITY_DEFINITIONS,
+} from "../data/stationFacilities";
 
 export type { GameState };
 
@@ -71,6 +76,7 @@ export interface FixerCreationResult {
   profile: FixerProfile;
   initialCredits: number;
   factionReputation: Record<string, number>;
+  stationCategory: StationCategory;
 }
 
 const LOWER_FACTIONS = [
@@ -153,7 +159,8 @@ export function createFixerProfileFromOrigin(
   origin: FixerOrigin,
   name: string,
   codename: string,
-  opts: FixerCreationOptions = {}
+  opts: FixerCreationOptions = {},
+  stationCategory: StationCategory = "업무",
 ): FixerCreationResult {
   const config = ORIGIN_CONFIG[origin];
   const fixerId = `fixer_${Date.now()}`;
@@ -172,21 +179,49 @@ export function createFixerProfileFromOrigin(
     profile,
     initialCredits: config.initialCredits,
     factionReputation: config.getFactionReputation(opts),
+    stationCategory,
   };
 }
 
-export function createDefaultStation(fixerId: string): StationState {
+export function createDefaultStation(
+  fixerId: string,
+  category: StationCategory = "업무",
+): StationState {
+  const facilityId = DEFAULT_FACILITY_BY_CATEGORY[category];
+  const facilityDef = FACILITY_DEFINITIONS[facilityId];
   return {
     stationId: `station_${Date.now()}`,
     fixerId,
-    category: "업무",
-    facilityName: "낡은 임대 아지트",
+    category,
+    facilityId,
+    facilityTier: 1,
+    facilityName: facilityDef.nameKo,
     locationTier: "하층",
     locationArea: "이름 없는 거리",
     level: 1,
     operatingCostPerTurn: 1000,
     analysisMissionLv: 0,
     analysisMercLv: 0,
+  };
+}
+
+/** 구세이브: facilityId/facilityTier 누락 시 업무 기본 시설로 보강 (기존 analysis 레벨 유지) */
+export function migrateLegacyStationState(station: StationState): StationState {
+  if (station.facilityId && station.facilityTier) {
+    return station;
+  }
+  const category = station.category ?? "업무";
+  const facilityId = DEFAULT_FACILITY_BY_CATEGORY[category];
+  const facilityDef = FACILITY_DEFINITIONS[facilityId];
+  return {
+    ...station,
+    category,
+    facilityId,
+    facilityTier: station.facilityTier ?? 1,
+    facilityName:
+      station.facilityName === "낡은 임대 아지트"
+        ? facilityDef.nameKo
+        : station.facilityName,
   };
 }
 

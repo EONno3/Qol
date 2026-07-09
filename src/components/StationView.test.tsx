@@ -11,6 +11,7 @@ import { getUpgradeCost } from "../domain/station";
 const noopSlotHandlers = {
   onAssignMercSlot: vi.fn(),
   onAssignMissionSlot: vi.fn(),
+  onUpgradeFacility: vi.fn(),
 };
 
 function renderStation(overrides: Partial<Parameters<typeof StationView>[0]> = {}) {
@@ -50,8 +51,8 @@ describe("StationView 컴포넌트 단위 테스트", () => {
 
   it("case 2: 인프라 탭에서 현재 스테이션 이름과 레벨이 렌더링된다", () => {
     renderStation();
-    expect(screen.getByText("테스트 아지트")).toBeInTheDocument();
-    expect(screen.getByText(/Lv\.1/)).toBeInTheDocument();
+    expect(screen.getByText("불법 통신 중계소")).toBeInTheDocument();
+    expect(screen.getByText(/인프라 Lv\.1/)).toBeInTheDocument();
   });
 
   it("case 3: 인프라 탭에서 크레딧이 충분하면 업그레이드 버튼이 활성화된다", () => {
@@ -131,6 +132,7 @@ describe("StationView 컴포넌트 단위 테스트", () => {
           onReplaceGear={vi.fn()}
           onAssignMercSlot={onAssignMercSlot}
           onAssignMissionSlot={vi.fn()}
+          onUpgradeFacility={vi.fn()}
         />
       );
       fireEvent.click(screen.getByText("분석 기관"));
@@ -142,7 +144,12 @@ describe("StationView 컴포넌트 단위 테스트", () => {
 
     it("T-DE-UI-3: 슬롯 배치 중 bonusLevel·effective 표시", () => {
       const state = createMockGameState({
-        stationState: createMockStationState({ analysisMercLv: 0, analysisMissionLv: 1 }),
+        stationState: createMockStationState({
+          category: "숙박",
+          facilityId: "lodging_patch_den",
+          analysisMercLv: 0,
+          analysisMissionLv: 0,
+        }),
         analysisSlots: {
           merc: { targetId: "merc_breaker_01", bonusLevel: 1 },
           mission: createEmptyAnalysisSlots().mission,
@@ -162,6 +169,13 @@ describe("StationView 컴포넌트 단위 테스트", () => {
       fireEvent.click(screen.getByText("분석 기관"));
       expect(screen.getByText(/슬롯 보너스 \+1/)).toBeInTheDocument();
       expect(screen.getByText(/effective Lv\.\s*1/)).toBeInTheDocument();
+    });
+  });
+
+  describe("시설 Tier 업그레이드 (T-DD-UI)", () => {
+    it("T-DD-UI-STATION-1: 시설 강화 버튼이 Tier 1에서 노출", () => {
+      renderStation();
+      expect(screen.getByRole("button", { name: "시설 Tier 업그레이드" })).toBeInTheDocument();
     });
   });
 });

@@ -1,14 +1,21 @@
 import { useState } from "react";
 import type { GameState } from "../domain/state";
-import { getUpgradeCost, getUpgradedStation, getHiringCost, getReplacementCost } from "../domain/station";
+import { getUpgradeCost, getUpgradedStation, getHiringCost, getReplacementCost, getFacilityUpgradeCost } from "../domain/station";
 import { mercenaries as allMercs } from "../data/seed";
 import { getMercenary, getMission } from "../data/lookups";
-import { effectiveMercAnalysisLevel, effectiveMissionAnalysisLevel } from "../domain/analysisSlot";
+import {
+  effectiveMercAnalysisLevel,
+  effectiveMissionAnalysisLevel,
+  getStationMercAnalysisBase,
+  getStationMissionAnalysisBase,
+} from "../domain/analysisSlot";
+import { FACILITY_DEFINITIONS } from "../data/stationFacilities";
 import { STATUS_GEAR_DESTROYED, STATUS_GEAR_DESTROYED_JOKER, TIER_LABEL_KO } from "../data/constants";
 
 interface Props {
   state: GameState;
   onUpgrade: () => void;
+  onUpgradeFacility: () => void;
   onHire: (mercId: string) => void;
   onFire: (mercId: string) => void;
   onReplaceGear: (mercId: string) => void;
@@ -19,6 +26,7 @@ interface Props {
 export function StationView({
   state,
   onUpgrade,
+  onUpgradeFacility,
   onHire,
   onFire,
   onReplaceGear,
@@ -43,6 +51,12 @@ export function StationView({
   const upgradeCost = getUpgradeCost(currentLevel);
   const upgradedPreview = getUpgradedStation(state);
   const canUpgrade = state.ledger >= upgradeCost;
+  const facilityTier = station.facilityTier ?? 1;
+  const facilityDef = FACILITY_DEFINITIONS[station.facilityId];
+  const facilityUpgradeCost = getFacilityUpgradeCost(facilityTier);
+  const canUpgradeFacility = facilityTier < 2 && state.ledger >= facilityUpgradeCost;
+  const mercAnalysisBase = getStationMercAnalysisBase(state);
+  const missionAnalysisBase = getStationMissionAnalysisBase(state);
 
   // 용병 목록 필터링
   const hiredIds = state.hiredMercs || [];
@@ -93,13 +107,20 @@ export function StationView({
         <div className="tab-content">
           <div className="station-card" style={{ background: "var(--panel-2)", padding: "1.5rem", border: "1px solid var(--panel-3)" }}>
             <h3 style={{ color: "var(--cyan)", marginTop: 0 }}>
-              {station.facilityName} <span style={{ fontSize: "0.8rem", color: "var(--muted)" }}>Lv.{currentLevel}</span>
+              {station.facilityName}{" "}
+              <span style={{ fontSize: "0.8rem", color: "var(--muted)" }}>
+                시설 T{facilityTier} · 인프라 Lv.{currentLevel}
+              </span>
             </h3>
             
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1rem", marginTop: "1rem" }}>
               <div>
                 <div className="muted">카테고리</div>
                 <div>{station.category}</div>
+              </div>
+              <div>
+                <div className="muted">시설 효과</div>
+                <div style={{ fontSize: "0.95rem" }}>{facilityDef.effectSummaryKo}</div>
               </div>
               <div>
                 <div className="muted">구역 위치</div>
@@ -114,29 +135,52 @@ export function StationView({
                 <div style={{ color: "var(--cyan)" }}>{state.maxCommandPoints} OP</div>
               </div>
               <div>
-                <div className="muted">용병 분석 Lv</div>
-                <div>Lv.{station.analysisMercLv}</div>
-              </div>
-              <div>
-                <div className="muted">미션 분석 Lv</div>
-                <div>Lv.{station.analysisMissionLv}</div>
+                <div className="muted">분석 베이스 (용병 / 미션)</div>
+                <div>Lv.{mercAnalysisBase} / Lv.{missionAnalysisBase}</div>
               </div>
             </div>
+            {station.category !== "업무" && (
+              <p className="muted" style={{ marginTop: "1rem", fontSize: "0.9rem" }}>
+                영구 분석 베이스 상승은 「업무」 카테고리 시설 Tier 업그레이드로만 가능합니다. 임시 분석은 분석 기관 슬롯을 이용하세요.
+              </p>
+            )}
           </div>
 
           <div className="station-upgrade-card" style={{ background: "var(--bg)", padding: "1.5rem", border: "1px dashed var(--muted)", marginTop: "2rem" }}>
-            <h3>다음 레벨 (Lv.{currentLevel + 1}) 업그레이드</h3>
+            <h3>시설 Tier 업그레이드 (T{facilityTier} → T{Math.min(2, facilityTier + 1)})</h3>
+            <p className="muted" style={{ marginTop: "0.5rem" }}>
+              {facilityTier >= 2
+                ? "최대 Tier에 도달했습니다."
+                : `${facilityDef.nameKo} 시설을 강화하여 카테고리 고유 효과가 상승합니다.`}
+            </p>
+            {facilityTier < 2 && (
+              <div style={{ marginTop: "1rem", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                <div style={{ fontSize: "1.1rem" }}>
+                  비용:{" "}
+                  <strong style={{ color: canUpgradeFacility ? "var(--cyan)" : "var(--danger)" }}>
+                    {facilityUpgradeCost.toLocaleString()} cr
+                  </strong>
+                </div>
+                <button
+                  className="primary"
+                  onClick={onUpgradeFacility}
+                  disabled={!canUpgradeFacility}
+                  aria-label="시설 Tier 업그레이드"
+                >
+                  시설 강화
+                </button>
+              </div>
+            )}
+          </div>
+
+          <div className="station-upgrade-card" style={{ background: "var(--bg)", padding: "1.5rem", border: "1px dashed var(--muted)", marginTop: "2rem" }}>
+            <h3>인프라 레벨 업그레이드 (Lv.{currentLevel} → Lv.{currentLevel + 1})</h3>
+            <p className="muted" style={{ fontSize: "0.9rem" }}>지휘력(OP) 상한·턴 유지비만 상승합니다. 분석 베이스는 시설 투자로 별도 관리됩니다.</p>
             
             {upgradedPreview && (
               <ul style={{ paddingLeft: "1.5rem", margin: "1rem 0", lineHeight: "1.6" }}>
                 <li>최대 지휘력: {state.maxCommandPoints} OP ➜ <strong style={{ color: "var(--cyan)" }}>{state.maxCommandPoints + 2} OP</strong></li>
                 <li>턴 당 유지비: {station.operatingCostPerTurn} cr ➜ <strong style={{ color: "var(--danger)" }}>{upgradedPreview.operatingCostPerTurn} cr</strong></li>
-                {upgradedPreview.analysisMercLv > station.analysisMercLv && (
-                  <li>용병 분석 Lv: {station.analysisMercLv} ➜ <strong>{upgradedPreview.analysisMercLv}</strong></li>
-                )}
-                {upgradedPreview.analysisMissionLv > station.analysisMissionLv && (
-                  <li>미션 분석 Lv: {station.analysisMissionLv} ➜ <strong>{upgradedPreview.analysisMissionLv}</strong></li>
-                )}
               </ul>
             )}
 
@@ -298,7 +342,7 @@ export function StationView({
           
           <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>
             {(() => {
-              const replacementCost = getReplacementCost();
+              const replacementCost = getReplacementCost(state);
               const canReplace = state.ledger >= replacementCost;
               return hiredMercs.filter(m => {
                 const s = state.mercStatuses[m.mercId] || [];

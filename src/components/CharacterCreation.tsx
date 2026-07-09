@@ -1,16 +1,29 @@
 import { useState } from "react";
-import type { FixerOrigin } from "../data/types";
+import type { FixerOrigin, StationCategory } from "../data/types";
 import {
   createFixerProfileFromOrigin,
   FACTION_IDS,
   type FixerCreationResult,
 } from "../domain/state";
 
+import { FACILITY_DEFINITIONS, DEFAULT_FACILITY_BY_CATEGORY } from "../data/stationFacilities";
+
 interface Props {
   onComplete: (result: FixerCreationResult) => void;
 }
 
-// ─── 출신지 메타데이터 ──────────────────────────────────────────────────────
+const STATION_CATEGORIES: StationCategory[] = ["숙박", "유흥", "식사", "장비", "업무"];
+
+const CATEGORY_META: Record<
+  StationCategory,
+  { headline: string; hint: string }
+> = {
+  숙박: { headline: "숙박", hint: "파견 후 피로도 누적 감소" },
+  유흥: { headline: "유흥", hint: "정산 시 용병 불만도 완화" },
+  식사: { headline: "식사", hint: "출격 지휘력(OP) 비용 감소" },
+  장비: { headline: "장비", hint: "암시장 재수급 비용 할인" },
+  업무: { headline: "업무", hint: "영구 분석 베이스 상승 (자본 투자)" },
+};
 
 const ORIGIN_META: Record<FixerOrigin, { label: string; tagline: string; bgTag: string }> = {
   하층_언존_태생: {
@@ -95,6 +108,7 @@ export function CharacterCreation({ onComplete }: Props) {
   const [name, setName] = useState("");
   const [codename, setCodename] = useState("");
   const [selectedOrigin, setSelectedOrigin] = useState<FixerOrigin | null>(null);
+  const [selectedCategory, setSelectedCategory] = useState<StationCategory>("업무");
   const [secondaryChoice, setSecondaryChoice] = useState<string>("");
 
   const needsSecondaryChoice =
@@ -131,7 +145,8 @@ export function CharacterCreation({ onComplete }: Props) {
       selectedOrigin,
       name.trim(),
       codename.trim(),
-      opts
+      opts,
+      selectedCategory,
     );
     onComplete(result);
   }
@@ -209,6 +224,34 @@ export function CharacterCreation({ onComplete }: Props) {
                   <div className="cc-origin-name">{meta.label}</div>
                   <div className="cc-origin-tag">{meta.bgTag}</div>
                   <div className="cc-origin-tagline">{meta.tagline}</div>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* 거점 카테고리 (스테이션 시설) */}
+        <div className="cc-section">
+          <div className="cc-section-label">핵심 거점 카테고리</div>
+          <p className="muted" style={{ marginBottom: "0.75rem", fontSize: "0.9rem" }}>
+            게임 내내 단 하나의 시설 카테고리만 운영합니다. Tier 업그레이드로 효과를 강화할 수 있습니다.
+          </p>
+          <div className="cc-origin-grid">
+            {STATION_CATEGORIES.map((category) => {
+              const meta = CATEGORY_META[category];
+              const facilityId = DEFAULT_FACILITY_BY_CATEGORY[category];
+              const facilityName = FACILITY_DEFINITIONS[facilityId].nameKo;
+              const isSelected = selectedCategory === category;
+              return (
+                <button
+                  key={category}
+                  id={`station-category-${category}`}
+                  className={`cc-origin-card${isSelected ? " cc-origin-card--on" : ""}`}
+                  onClick={() => setSelectedCategory(category)}
+                >
+                  <div className="cc-origin-name">{meta.headline}</div>
+                  <div className="cc-origin-tag">{facilityName}</div>
+                  <div className="cc-origin-tagline">{meta.hint}</div>
                 </button>
               );
             })}

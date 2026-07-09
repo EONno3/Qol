@@ -2,45 +2,47 @@ import type { GameState } from "./state";
 import { getMercenary } from "../data/lookups";
 import { STATUS_GEAR_DESTROYED, STATUS_GEAR_DESTROYED_JOKER } from "../data/constants";
 import { GAME_CONFIG } from "../data/config";
+import { getStationModifiers } from "./stationModifiers";
 
 // 레벨 업에 필요한 크레딧 계산 공식
 export function getUpgradeCost(currentLevel: number): number {
   return currentLevel * GAME_CONFIG.station.upgradeCostMultiplier;
 }
 
-// 장비 재수급 비용 (GAME_CONFIG 단일 소스 참조)
-export function getReplacementCost(): number {
-  return GAME_CONFIG.mercenary.replacementCost;
+export function getFacilityUpgradeCost(currentTier: number): number {
+  if (currentTier >= 2) return 0;
+  return GAME_CONFIG.station.facilityUpgradeCost;
 }
 
+// 장비 재수급 비용 (시설 장비 카테고리 할인 반영)
+export function getReplacementCost(state?: GameState): number {
+  const base = GAME_CONFIG.mercenary.replacementCost;
+  if (!state) return base;
+  const { replacementCostMultiplier } = getStationModifiers(state);
+  return Math.floor(base * replacementCostMultiplier);
+}
 
-// 업그레이드 시 능력치 변화 계산
+// 업그레이드 시 능력치 변화 계산 (인프라: OP·운영비만 — 분석은 업무 시설 전용)
 export function getUpgradedStation(state: GameState) {
   if (!state.stationState) return null;
   const currentLevel = state.stationState.level;
   const nextLevel = currentLevel + 1;
 
-  // 레벨에 따른 분석 레벨 배정 (Lv1: 0, Lv2: 1, Lv3: 2...)
-  // 더 단순화: Lv1=0, Lv2=1, Lv3=2
-  const nextAnalysis = nextLevel - 1;
-
   return {
     ...state.stationState,
     level: nextLevel,
     operatingCostPerTurn: Math.pow(nextLevel, 2) * GAME_CONFIG.station.operatingCostBaseMultiplier,
-    analysisMissionLv: Math.min(2, nextAnalysis),
-    analysisMercLv: Math.min(2, nextAnalysis),
   };
 }
 
 export function upgradeStation(state: GameState): GameState {
   if (!state.stationState) return state;
-  
+
   const currentLevel = state.stationState.level;
   const cost = getUpgradeCost(currentLevel);
 
   if (state.ledger < cost) {
-    return state; // 크레딧 부족
+    return state;
   }
 
   const upgradedStation = getUpgradedStation(state);
@@ -55,6 +57,24 @@ export function upgradeStation(state: GameState): GameState {
   };
 }
 
+export function upgradeFacilityTier(state: GameState): GameState {
+  if (!state.stationState) return state;
+  const currentTier = state.stationState.facilityTier ?? 1;
+  if (currentTier >= 2) return state;
+
+  const cost = getFacilityUpgradeCost(currentTier);
+  if (state.ledger < cost) return state;
+
+  return {
+    ...state,
+    ledger: state.ledger - cost,
+    stationState: {
+      ...state.stationState,
+      facilityTier: 2,
+    },
+  };
+}
+
 // 용병 고용 비용 계산 (임시: 지휘력 코스트 * 2000)
 export function getHiringCost(mercId: string): number {
   const merc = getMercenary(mercId);
@@ -64,15 +84,15 @@ export function getHiringCost(mercId: string): number {
 }
 
 export function hireMercenary(state: GameState, mercId: string): GameState {
-  if (state.hiredMercs.includes(mercId)) return state; // 이미 고용됨
-  
+  if (state.hiredMercs.includes(mercId)) return state;
+
   const cost = getHiringCost(mercId);
-  if (state.ledger < cost) return state; // 크레딧 부족
+  if (state.ledger < cost) return state;
 
   return {
     ...state,
     ledger: state.ledger - cost,
-    hiredMercs: [...state.hiredMercs, mercId]
+    hiredMercs: [...state.hiredMercs, mercId],
   };
 }
 
@@ -81,35 +101,35 @@ export function fireMercenary(state: GameState, mercId: string): GameState {
 
   return {
     ...state,
-    hiredMercs: state.hiredMercs.filter(id => id !== mercId)
+    hiredMercs: state.hiredMercs.filter((id) => id !== mercId),
   };
 }
 
 export function replaceDestroyedGear(state: GameState, mercId: string): GameState {
-  const REPLACEMENT_COST = GAME_CONFIG.mercenary.replacementCost;
+  const REPLACEMENT_COST = getReplacementCost(state);
   if (state.ledger < REPLACEMENT_COST) return state;
 
   const currentStatuses = state.mercStatuses[mercId] || [];
-  const hasDestroyedGear = currentStatuses.includes(STATUS_GEAR_DESTROYED) || currentStatuses.includes(STATUS_GEAR_DESTROYED_JOKER);
-  
-  // 소유 장비 및 임플란트 중 파손된 항목 조회
+  const hasDestroyedGear =
+    currentStatuses.includes(STATUS_GEAR_DESTROYED) ||
+    currentStatuses.includes(STATUS_GEAR_DESTROYED_JOKER);
+
   const ownedGears = Object.entries(state.gearOwner)
     .filter(([, ownerId]) => ownerId === mercId)
     .map(([gearId]) => gearId);
-  
+
   const ownedImplants = Object.entries(state.implantOwner)
     .filter(([, ownerId]) => ownerId === mercId)
     .map(([implantId]) => implantId);
 
   const brokenGearId = ownedGears.find(
-    (gid) => state.gearStates[gid] === "destroyed" || state.gearStates[gid] === "damaged"
-  );
-  
-  const brokenImplantId = ownedImplants.find(
-    (iid) => state.implantStates[iid] === "destroyed" || state.implantStates[iid] === "damaged"
+    (gid) => state.gearStates[gid] === "destroyed" || state.gearStates[gid] === "damaged",
   );
 
-  // 상태 태그 혹은 실제 장비 파손이 없으면 취소
+  const brokenImplantId = ownedImplants.find(
+    (iid) => state.implantStates[iid] === "destroyed" || state.implantStates[iid] === "damaged",
+  );
+
   if (!hasDestroyedGear && !brokenGearId && !brokenImplantId) return state;
 
   const newGearStates = { ...state.gearStates };
@@ -123,7 +143,7 @@ export function replaceDestroyedGear(state: GameState, mercId: string): GameStat
   }
 
   const newStatuses = currentStatuses.filter(
-    s => s !== STATUS_GEAR_DESTROYED && s !== STATUS_GEAR_DESTROYED_JOKER
+    (s) => s !== STATUS_GEAR_DESTROYED && s !== STATUS_GEAR_DESTROYED_JOKER,
   );
 
   return {
@@ -133,7 +153,7 @@ export function replaceDestroyedGear(state: GameState, mercId: string): GameStat
     implantStates: newImplantStates,
     mercStatuses: {
       ...state.mercStatuses,
-      [mercId]: newStatuses
-    }
+      [mercId]: newStatuses,
+    },
   };
 }

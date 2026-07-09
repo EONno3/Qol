@@ -3,6 +3,7 @@ import type { ResultReport, ResultType, MissionTypeKey } from "../data/types";
 import type { GameState } from "./state";
 import { STATUS_KIA } from "../data/constants";
 import { calcCompensationSplit, calcDissatisfactionGain } from "./mercCompensation";
+import { getStationModifiers } from "./stationModifiers";
 
 export { getReport };
 
@@ -120,7 +121,13 @@ export function applySettlement(
   const expectedShareRate =
     options?.mercExpectedShareRate ?? mercDef?.expectedShareRate ?? 0;
   const { fixerCredits } = calcCompensationSplit(net, mercShareRate);
-  const dissGain = calcDissatisfactionGain(expectedShareRate, mercShareRate, net);
+  const { dissatisfactionGainMultiplier } = getStationModifiers(state);
+  const dissGain = calcDissatisfactionGain(
+    expectedShareRate,
+    mercShareRate,
+    net,
+    dissatisfactionGainMultiplier,
+  );
 
   const mercDissatisfactionStacks = { ...state.mercDissatisfactionStacks };
   if (dissGain > 0) {

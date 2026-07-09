@@ -1,5 +1,6 @@
 import type { GameState } from "./state";
 import type { AnalysisSlotsState } from "../data/types";
+import { getStationAnalysisFacilityBonus } from "./stationModifiers";
 
 export const MAX_ANALYSIS_LEVEL = 2;
 
@@ -11,11 +12,13 @@ export function createEmptyAnalysisSlots(): AnalysisSlotsState {
 }
 
 export function getStationMercAnalysisBase(state: GameState): number {
-  return state.stationState?.analysisMercLv ?? 0;
+  const raw = state.stationState?.analysisMercLv ?? 0;
+  return Math.min(MAX_ANALYSIS_LEVEL, raw + getStationAnalysisFacilityBonus(state));
 }
 
 export function getStationMissionAnalysisBase(state: GameState): number {
-  return state.stationState?.analysisMissionLv ?? 0;
+  const raw = state.stationState?.analysisMissionLv ?? 0;
+  return Math.min(MAX_ANALYSIS_LEVEL, raw + getStationAnalysisFacilityBonus(state));
 }
 
 export function maxSlotBonusForBase(stationBase: number): number {

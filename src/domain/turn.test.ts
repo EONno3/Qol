@@ -23,13 +23,15 @@ describe("advanceTurn", () => {
       stationId: "test_st",
       fixerId: "fixer_01",
       category: "장비",
+      facilityId: "gear_shadow_pawn",
+      facilityTier: 1,
       facilityName: "Test Facility",
       locationTier: "하층",
       locationArea: "Pipe",
       level: 2,
       operatingCostPerTurn: 1000,
       analysisMercLv: 1,
-      analysisMissionLv: 1
+      analysisMissionLv: 1,
     };
 
     const next = advanceTurn(state);

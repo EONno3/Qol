@@ -13,6 +13,8 @@ export const GAME_CONFIG = {
   station: {
     upgradeCostMultiplier: 25000,
     operatingCostBaseMultiplier: 1000,
+    /** 시설 Tier 1 → 2 업그레이드 비용 */
+    facilityUpgradeCost: 20000,
   },
   // 용병 관련 밸런스
   mercenary: {

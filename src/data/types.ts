@@ -20,6 +20,15 @@ export type FixerOrigin =
   | "무지한_외부인";
 
 export type StationCategory = "숙박" | "유흥" | "식사" | "장비" | "업무";
+
+export type FacilityId =
+  | "lodging_patch_den"
+  | "entertainment_alley_bar"
+  | "meal_field_kitchen"
+  | "gear_shadow_pawn"
+  | "work_signal_relay";
+
+export type StationFacilityTier = 1 | 2;
 export type MissionTypeKey = "잠입" | "전투" | "지원" | "기업" | "비밀" | "교섭" | "추적";
 
 // --- 태그 시스템 (03_태그_사전 / 미션 태그 해석 규칙.md) ---
@@ -222,6 +231,8 @@ export interface StationState {
   stationId: string;
   fixerId: string;
   category: StationCategory;
+  facilityId: FacilityId;
+  facilityTier: StationFacilityTier;
   facilityName: string;
   locationTier: LocationTier;
   locationArea: string;

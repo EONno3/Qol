@@ -69,6 +69,8 @@ export interface MissionRunParams {
   initialQueue?: NodeQueue;
   /** 캐치업(현장 개입) 설정 — 미전달 시 판정 완전 불변(옵트인) */
   catchUp?: import("../data/types").CatchUpConfig;
+  /** 숙박 시설 등 — 피로도 누적 배율 (기본 1) */
+  fatigueMultiplier?: number;
   postNodeRouting?: (
     node: QueuedNode,
     judgment: ReturnType<typeof resolveNodeJudgment>,
@@ -95,7 +97,7 @@ function mergeTriggered(
 }
 
 export function executeMissionRun(params: MissionRunParams): MissionRunResult {
-  const { mission, merc, loadout, postNodeRouting, catchUp } = params;
+  const { mission, merc, loadout, postNodeRouting, catchUp, fatigueMultiplier = 1 } = params;
   const catchUpActive = !!catchUp && catchUp.interventionNodeNamesKo.length > 0;
   let catchUpBonusEarned = false;
   const rng = params.rng ?? Math.random;
@@ -273,6 +275,8 @@ export function executeMissionRun(params: MissionRunParams): MissionRunResult {
       noteKo: "조커 카드 발동으로 인한 치명적 장비 파손",
     });
   }
+
+  totalFatigue = Math.round(totalFatigue * fatigueMultiplier);
 
   let reward = 0;
   let summaryLogKo = "";

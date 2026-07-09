@@ -17,6 +17,9 @@ function stateWithStation(mercBase = 0, missionBase = 0) {
   state = {
     ...state,
     stationState: createMockStationState({
+      category: "숙박",
+      facilityId: "lodging_patch_den",
+      facilityName: "땜질 소굴",
       analysisMercLv: mercBase,
       analysisMissionLv: missionBase,
     }),

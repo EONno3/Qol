@@ -23,6 +23,7 @@ export function calcDissatisfactionGain(
   expectedShareRate: number,
   appliedShareRate: number,
   net: number,
+  gainMultiplier = 1,
 ): number {
   if (net <= 0 || appliedShareRate >= expectedShareRate) {
     return 0;
@@ -30,5 +31,7 @@ export function calcDissatisfactionGain(
   const expectedPct = Math.round(expectedShareRate * 100);
   const appliedPct = Math.round(appliedShareRate * 100);
   const shortfallPercent = Math.max(0, expectedPct - appliedPct);
-  return shortfallPercent * GAME_CONFIG.mercenary.dissatisfactionPerPercentShortfall;
+  const base =
+    shortfallPercent * GAME_CONFIG.mercenary.dissatisfactionPerPercentShortfall;
+  return Math.floor(base * Math.max(0, gainMultiplier));
 }
