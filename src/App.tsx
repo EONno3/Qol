@@ -14,6 +14,7 @@ import {
   createEmptyAnalysisSlots,
   getAnalysisBaseLevels,
   getEffectiveAnalysisLevels,
+  migrateAnalysisSlots,
 } from "./domain/analysisSlot";
 import { GAME_CONFIG } from "./data/config";
 import { buildNarratorWorldState } from "./domain/worldStateExport";
@@ -95,6 +96,11 @@ export function App({ initialState, bypassTitle = false }: { initialState?: Game
       loadedState = {
         ...loadedState,
         analysisSlots: createEmptyAnalysisSlots(),
+      };
+    } else {
+      loadedState = {
+        ...loadedState,
+        analysisSlots: migrateAnalysisSlots(loadedState.analysisSlots),
       };
     }
     // 호환성 패치 6: facilityId/facilityTier 누락 구세이브 보강
@@ -458,8 +464,8 @@ export function App({ initialState, bypassTitle = false }: { initialState?: Game
           stationMissionBase={analysisBaseLevels.mission}
           mercSlotTargetId={state.analysisSlots.merc.targetId}
           missionSlotTargetId={state.analysisSlots.mission.targetId}
-          mercSlotBonus={state.analysisSlots.merc.bonusLevel}
-          missionSlotBonus={state.analysisSlots.mission.bonusLevel}
+          mercSlotProgress={state.analysisSlots.merc.progress}
+          missionSlotProgress={state.analysisSlots.mission.progress}
           onGoBoard={() => setScreen("board")}
           onGoAccepted={() => setScreen("accepted")}
           onGoDesk={() => setScreen("desk")}

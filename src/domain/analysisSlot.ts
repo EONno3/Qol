@@ -1,13 +1,33 @@
 import type { GameState } from "./state";
-import type { AnalysisSlotsState } from "../data/types";
+import type { AnalysisSlotEntry, AnalysisSlotsState } from "../data/types";
 import { getStationAnalysisFacilityBonus } from "./stationModifiers";
 
 export const MAX_ANALYSIS_LEVEL = 2;
 
+type LegacyAnalysisSlotEntry = {
+  targetId: string | null;
+  progress?: number;
+  bonusLevel?: number;
+};
+
+export function migrateAnalysisSlotEntry(entry: LegacyAnalysisSlotEntry): AnalysisSlotEntry {
+  return {
+    targetId: entry.targetId,
+    progress: entry.progress ?? entry.bonusLevel ?? 0,
+  };
+}
+
+export function migrateAnalysisSlots(slots: AnalysisSlotsState): AnalysisSlotsState {
+  return {
+    merc: migrateAnalysisSlotEntry(slots.merc as LegacyAnalysisSlotEntry),
+    mission: migrateAnalysisSlotEntry(slots.mission as LegacyAnalysisSlotEntry),
+  };
+}
+
 export function createEmptyAnalysisSlots(): AnalysisSlotsState {
   return {
-    merc: { targetId: null, bonusLevel: 0 },
-    mission: { targetId: null, bonusLevel: 0 },
+    merc: { targetId: null, progress: 0 },
+    mission: { targetId: null, progress: 0 },
   };
 }
 
@@ -38,7 +58,7 @@ export function maxSlotBonusForBase(stationBase: number): number {
   return Math.max(0, MAX_ANALYSIS_LEVEL - stationBase);
 }
 
-/** 턴 진행 시 슬롯에 배치된 대상의 bonusLevel +1 (기관 베이스 한도 내) */
+/** 턴 진행 시 슬롯에 배치된 대상의 progress +1 (기관 베이스 한도 내) */
 export function tickAnalysisSlotsOnTurnAdvance(state: GameState): AnalysisSlotsState {
   const { merc, mission } = state.analysisSlots;
   const mercBase = getStationMercAnalysisBase(state);
@@ -48,13 +68,13 @@ export function tickAnalysisSlotsOnTurnAdvance(state: GameState): AnalysisSlotsS
     merc: merc.targetId
       ? {
           ...merc,
-          bonusLevel: Math.min(maxSlotBonusForBase(mercBase), merc.bonusLevel + 1),
+          progress: Math.min(maxSlotBonusForBase(mercBase), merc.progress + 1),
         }
       : merc,
     mission: mission.targetId
       ? {
           ...mission,
-          bonusLevel: Math.min(maxSlotBonusForBase(missionBase), mission.bonusLevel + 1),
+          progress: Math.min(maxSlotBonusForBase(missionBase), mission.progress + 1),
         }
       : mission,
   };
@@ -68,7 +88,7 @@ export function assignMercAnalysisSlot(
     ...state,
     analysisSlots: {
       ...state.analysisSlots,
-      merc: { targetId: mercId, bonusLevel: 0 },
+      merc: { targetId: mercId, progress: 0 },
     },
   };
 }
@@ -81,23 +101,23 @@ export function assignMissionAnalysisSlot(
     ...state,
     analysisSlots: {
       ...state.analysisSlots,
-      mission: { targetId: missionId, bonusLevel: 0 },
+      mission: { targetId: missionId, progress: 0 },
     },
   };
 }
 
-/** 슬롯 배치 중인 대상에만 bonusLevel 적용 (임시 상승) */
+/** 슬롯 배치 중인 대상에만 progress 적용 (임시 상승) */
 function computeEffectiveMercLevel(state: GameState, mercId: string): number {
   const base = getStationMercAnalysisBase(state);
   const slot = state.analysisSlots.merc;
-  const bonus = slot.targetId === mercId ? slot.bonusLevel : 0;
+  const bonus = slot.targetId === mercId ? slot.progress : 0;
   return Math.min(MAX_ANALYSIS_LEVEL, base + bonus);
 }
 
 function computeEffectiveMissionLevel(state: GameState, missionId: string): number {
   const base = getStationMissionAnalysisBase(state);
   const slot = state.analysisSlots.mission;
-  const bonus = slot.targetId === missionId ? slot.bonusLevel : 0;
+  const bonus = slot.targetId === missionId ? slot.progress : 0;
   return Math.min(MAX_ANALYSIS_LEVEL, base + bonus);
 }
 
@@ -107,7 +127,7 @@ export type EffectiveAnalysisLevels = {
   match: number;
 };
 
-/** UI·도메인 공통: 베이스 + 슬롯 보너스가 반영된 실효 분석 레벨 SSOT */
+/** UI·도메인 공통: 베이스 + 슬롯 progress가 반영된 실효 분석 레벨 SSOT */
 export function getEffectiveAnalysisLevels(
   state: GameState,
   mercId?: string | null,

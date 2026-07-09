@@ -211,7 +211,7 @@ export function StationView({
               <p className="muted" style={{ fontSize: "0.9rem" }}>
                 기관 베이스 Lv.{mercAnalysisBase}
                 {mercSlot.targetId && (
-                  <> · 슬롯 보너스 +{mercSlot.bonusLevel} → effective Lv.
+                  <> · 슬롯 보너스 +{mercSlot.progress} → effective Lv.
                   {getEffectiveAnalysisLevels(state, mercSlot.targetId).merc}</>
                 )}
               </p>
@@ -239,7 +239,7 @@ export function StationView({
               <p className="muted" style={{ fontSize: "0.9rem" }}>
                 기관 베이스 Lv.{missionAnalysisBase}
                 {missionSlot.targetId && (
-                  <> · 슬롯 보너스 +{missionSlot.bonusLevel} → effective Lv.
+                  <> · 슬롯 보너스 +{missionSlot.progress} → effective Lv.
                   {getEffectiveAnalysisLevels(state, null, missionSlot.targetId).mission}</>
                 )}
               </p>

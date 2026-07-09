@@ -369,7 +369,7 @@ export interface Mission {
 
 export interface AnalysisSlotEntry {
   targetId: string | null;
-  bonusLevel: number;
+  progress: number;
 }
 
 export interface AnalysisSlotsState {

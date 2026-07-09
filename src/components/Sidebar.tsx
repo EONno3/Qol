@@ -7,8 +7,8 @@ interface Props {
   stationMissionBase: number;
   mercSlotTargetId: string | null;
   missionSlotTargetId: string | null;
-  mercSlotBonus: number;
-  missionSlotBonus: number;
+  mercSlotProgress: number;
+  missionSlotProgress: number;
   onGoBoard: () => void;
   onGoAccepted: () => void;
   onGoDesk: () => void;
@@ -25,8 +25,8 @@ export function Sidebar({
   stationMissionBase,
   mercSlotTargetId,
   missionSlotTargetId,
-  mercSlotBonus,
-  missionSlotBonus,
+  mercSlotProgress,
+  missionSlotProgress,
   onGoBoard,
   onGoAccepted,
   onGoDesk,
@@ -76,7 +76,7 @@ export function Sidebar({
           {mercSlotTargetId && (
             <span style={{ color: "var(--cyan)" }}>
               {" "}
-              · 슬롯 +{mercSlotBonus}
+              · 슬롯 +{mercSlotProgress}
             </span>
           )}
         </div>
@@ -85,7 +85,7 @@ export function Sidebar({
           {missionSlotTargetId && (
             <span style={{ color: "var(--cyan)" }}>
               {" "}
-              · 슬롯 +{missionSlotBonus}
+              · 슬롯 +{missionSlotProgress}
             </span>
           )}
         </div>

@@ -149,7 +149,7 @@ describe("StationView 컴포넌트 단위 테스트", () => {
       expect(screen.queryByText(/기관 베이스 Lv\.0/)).not.toBeInTheDocument();
     });
 
-    it("T-DE-UI-3: 슬롯 배치 중 bonusLevel·effective 표시", () => {
+    it("T-DE-UI-3: 슬롯 배치 중 progress·effective 표시", () => {
       const state = createMockGameState({
         stationState: createMockStationState({
           category: "숙박",
@@ -158,7 +158,7 @@ describe("StationView 컴포넌트 단위 테스트", () => {
           analysisMissionLv: 0,
         }),
         analysisSlots: {
-          merc: { targetId: "merc_breaker_01", bonusLevel: 1 },
+          merc: { targetId: "merc_breaker_01", progress: 1 },
           mission: createEmptyAnalysisSlots().mission,
         },
         hiredMercs: ["merc_breaker_01"],
