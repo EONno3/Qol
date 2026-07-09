@@ -1160,3 +1160,198 @@ button.ghost {
   letter-spacing: 0.04em;
 }
 
+/* ---- D-C-1: 출격 전 관제 드론 UI ---- */
+.drone-catchup-panel {
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  padding: 0.75rem;
+  margin-bottom: 0.5rem;
+  background: rgba(10, 12, 16, 0.6);
+}
+
+.drone-catchup-panel--active {
+  border-color: var(--amber);
+  box-shadow: 0 0 12px rgba(246, 183, 60, 0.12);
+}
+
+.drone-catchup-toggle {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  cursor: pointer;
+}
+
+.drone-catchup-active {
+  margin-top: 0.65rem;
+  font-size: 0.9rem;
+}
+
+.drone-catchup-header {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  margin-bottom: 0.55rem;
+  padding-bottom: 0.45rem;
+  border-bottom: 1px solid rgba(43, 212, 217, 0.25);
+}
+
+.drone-catchup-header__icon {
+  color: var(--cyan);
+  font-size: 0.85rem;
+}
+
+.drone-catchup-header__title {
+  color: var(--amber);
+  font-weight: 700;
+  letter-spacing: 0.03em;
+}
+
+.drone-catchup-header__badge {
+  margin-left: auto;
+  font-size: 0.68rem;
+  letter-spacing: 0.12em;
+  color: var(--cyan);
+  border: 1px solid rgba(43, 212, 217, 0.45);
+  padding: 0.1rem 0.35rem;
+  border-radius: 3px;
+}
+
+.drone-catchup-hud {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.35rem 0.5rem;
+  margin-bottom: 0.6rem;
+  padding: 0.45rem 0.55rem;
+  background: rgba(43, 212, 217, 0.06);
+  border: 1px solid rgba(43, 212, 217, 0.2);
+  border-radius: 4px;
+}
+
+.drone-catchup-hud__label {
+  color: var(--muted);
+  font-size: 0.78rem;
+  letter-spacing: 0.06em;
+}
+
+.drone-catchup-hud__value {
+  color: var(--amber);
+  font-weight: 700;
+}
+
+.drone-catchup-hud__meta {
+  color: var(--muted);
+  font-size: 0.82rem;
+}
+
+.drone-catchup-nodes__hint {
+  margin: 0 0 0.35rem;
+  color: var(--muted);
+}
+
+.drone-catchup-nodes__list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.drone-catchup-node {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.drone-catchup-nodes__error {
+  color: var(--red);
+  margin: 0.35rem 0 0;
+}
+
+.drone-glitch {
+  position: relative;
+  overflow: hidden;
+  margin: 0;
+  padding: 0.65rem 0.75rem;
+  border: 1px solid rgba(246, 183, 60, 0.45);
+  background: linear-gradient(
+    135deg,
+    rgba(255, 79, 154, 0.08) 0%,
+    rgba(246, 183, 60, 0.06) 50%,
+    rgba(10, 12, 16, 0.9) 100%
+  );
+  border-radius: 4px;
+  animation: drone-glitch-flicker 2.4s infinite;
+}
+
+.drone-glitch__scanline {
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 2px,
+    rgba(43, 212, 217, 0.04) 2px,
+    rgba(43, 212, 217, 0.04) 4px
+  );
+  pointer-events: none;
+  animation: drone-glitch-scan 3s linear infinite;
+}
+
+.drone-glitch__label {
+  position: relative;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  color: var(--magenta);
+  text-shadow: 1px 0 var(--cyan);
+  margin-bottom: 0.35rem;
+}
+
+.drone-glitch__body {
+  position: relative;
+  margin: 0;
+  color: var(--text);
+  line-height: 1.45;
+}
+
+.drone-glitch__body strong {
+  color: var(--amber);
+}
+
+.drone-glitch__hint {
+  position: relative;
+  margin: 0.35rem 0 0;
+  font-size: 0.8rem;
+  color: var(--muted);
+}
+
+@keyframes drone-glitch-flicker {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  48% {
+    opacity: 1;
+  }
+  49% {
+    opacity: 0.92;
+  }
+  50% {
+    opacity: 1;
+  }
+  51% {
+    opacity: 0.88;
+  }
+  52% {
+    opacity: 1;
+  }
+}
+
+@keyframes drone-glitch-scan {
+  0% {
+    transform: translateY(-100%);
+  }
+  100% {
+    transform: translateY(100%);
+  }
+}
+
