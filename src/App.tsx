@@ -12,9 +12,8 @@ import {
   assignMercAnalysisSlot,
   assignMissionAnalysisSlot,
   createEmptyAnalysisSlots,
-  effectiveMercAnalysisLevel,
-  effectiveMissionAnalysisLevel,
   getAnalysisBaseLevels,
+  getEffectiveAnalysisLevels,
 } from "./domain/analysisSlot";
 import { GAME_CONFIG } from "./data/config";
 import { buildNarratorWorldState } from "./domain/worldStateExport";
@@ -103,6 +102,13 @@ export function App({ initialState, bypassTitle = false }: { initialState?: Game
       loadedState = {
         ...loadedState,
         stationState: migrateLegacyStationState(loadedState.stationState),
+      };
+    }
+    // 호환성 패치 7: missionDecayTimers 누락 구세이브 보강
+    if (!loadedState.missionDecayTimers) {
+      loadedState = {
+        ...loadedState,
+        missionDecayTimers: {},
       };
     }
     return loadedState;
@@ -484,7 +490,9 @@ export function App({ initialState, bypassTitle = false }: { initialState?: Game
         {screen === "detail" && selectedMission && (
           <MissionDetail
             mission={selectedMission}
-            analysisLevel={effectiveMissionAnalysisLevel(state, selectedMission.missionId)}
+            analysisLevel={
+              getEffectiveAnalysisLevels(state, null, selectedMission.missionId).mission
+            }
             onAccept={handleAccept}
             onBack={() => setScreen("board")}
           />
@@ -499,11 +507,11 @@ export function App({ initialState, bypassTitle = false }: { initialState?: Game
             mission={selectedMission}
             mercenaries={allMercs.filter((m) => state.hiredMercs?.includes(m.mercId))}
             mercAnalysisLevel={
-              selectedMercId
-                ? effectiveMercAnalysisLevel(state, selectedMercId)
-                : analysisBaseLevels.merc
+              getEffectiveAnalysisLevels(state, selectedMercId, selectedMission.missionId).merc
             }
-            missionAnalysisLevel={effectiveMissionAnalysisLevel(state, selectedMission.missionId)}
+            missionAnalysisLevel={
+              getEffectiveAnalysisLevels(state, selectedMercId, selectedMission.missionId).mission
+            }
             selectedMercId={selectedMercId}
             currentCommandPoints={state.currentCommandPoints}
             busyMercIds={[...state.activeDispatches, ...state.completedDispatches].map(d => d.mercId)}

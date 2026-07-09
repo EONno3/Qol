@@ -8,6 +8,7 @@ import {
   effectiveMatchAnalysisLevel,
   effectiveMercAnalysisLevel,
   effectiveMissionAnalysisLevel,
+  getEffectiveAnalysisLevels,
   tickAnalysisSlotsOnTurnAdvance,
 } from "./analysisSlot";
 import { advanceTurn } from "./turn";
@@ -60,6 +61,7 @@ describe("analysisSlot turn tick (T-DE-TURN)", () => {
     let state = assignMercAnalysisSlot(stateWithStation(0, 0), "merc_a");
     state = advanceTurn(state);
     expect(state.analysisSlots.merc.bonusLevel).toBe(1);
+    expect(getEffectiveAnalysisLevels(state, "merc_a").merc).toBe(1);
   });
 
   it("T-DE-TURN-2: 2턴 연속 진행 시 bonusLevel 최대 2까지 상승", () => {
@@ -67,8 +69,10 @@ describe("analysisSlot turn tick (T-DE-TURN)", () => {
     state = advanceTurn(state);
     state = advanceTurn(state);
     expect(state.analysisSlots.merc.bonusLevel).toBe(2);
+    expect(getEffectiveAnalysisLevels(state, "merc_a").merc).toBe(2);
     state = advanceTurn(state);
     expect(state.analysisSlots.merc.bonusLevel).toBe(2);
+    expect(getEffectiveAnalysisLevels(state, "merc_a").merc).toBe(2);
   });
 
   it("T-DE-TURN-3: 스테이션 베이스 Lv1이면 슬롯 보너스는 최대 +1", () => {
@@ -96,8 +100,10 @@ describe("effective analysis level (T-DE-EFFECTIVE)", () => {
   it("T-DE-EFFECTIVE-2: 슬롯 배치 대상만 bonusLevel이 effective에 합산", () => {
     let state = assignMercAnalysisSlot(stateWithStation(0, 0), "merc_a");
     state = advanceTurn(state);
-    expect(effectiveMercAnalysisLevel(state, "merc_a")).toBe(1);
-    expect(effectiveMercAnalysisLevel(state, "merc_b")).toBe(0);
+    const levels = getEffectiveAnalysisLevels(state, "merc_a", "mission_x");
+    expect(levels.merc).toBe(1);
+    expect(getEffectiveAnalysisLevels(state, "merc_b").merc).toBe(0);
+    expect(effectiveMercAnalysisLevel(state, "merc_a")).toBe(levels.merc);
   });
 
   it("T-DE-EFFECTIVE-3: 슬롯 해제 후 보너스 소멸 → 베이스만", () => {
@@ -125,6 +131,8 @@ describe("effective analysis level (T-DE-EFFECTIVE)", () => {
         mission: { targetId: "mission_x", bonusLevel: 2 },
       },
     };
-    expect(effectiveMatchAnalysisLevel(state, "merc_a", "mission_x")).toBe(2);
+    const levels = getEffectiveAnalysisLevels(state, "merc_a", "mission_x");
+    expect(levels.match).toBe(2);
+    expect(effectiveMatchAnalysisLevel(state, "merc_a", "mission_x")).toBe(levels.match);
   });
 });

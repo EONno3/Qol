@@ -252,6 +252,7 @@ export function createInitialState(): GameState {
     mercStatuses: structuredClone(initialMercStatuses),
     mercDissatisfactionStacks: {},
     analysisSlots: createEmptyAnalysisSlots(),
+    missionDecayTimers: {},
     gearStates: {
       gear_feet_insulated_boots_01: "normal",
       gear_wrist_auth_bypass_bracelet_01: "normal",

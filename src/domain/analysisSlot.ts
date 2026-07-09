@@ -87,18 +87,53 @@ export function assignMissionAnalysisSlot(
 }
 
 /** 슬롯 배치 중인 대상에만 bonusLevel 적용 (임시 상승) */
-export function effectiveMercAnalysisLevel(state: GameState, mercId: string): number {
+function computeEffectiveMercLevel(state: GameState, mercId: string): number {
   const base = getStationMercAnalysisBase(state);
   const slot = state.analysisSlots.merc;
   const bonus = slot.targetId === mercId ? slot.bonusLevel : 0;
   return Math.min(MAX_ANALYSIS_LEVEL, base + bonus);
 }
 
-export function effectiveMissionAnalysisLevel(state: GameState, missionId: string): number {
+function computeEffectiveMissionLevel(state: GameState, missionId: string): number {
   const base = getStationMissionAnalysisBase(state);
   const slot = state.analysisSlots.mission;
   const bonus = slot.targetId === missionId ? slot.bonusLevel : 0;
   return Math.min(MAX_ANALYSIS_LEVEL, base + bonus);
+}
+
+export type EffectiveAnalysisLevels = {
+  merc: number;
+  mission: number;
+  match: number;
+};
+
+/** UI·도메인 공통: 베이스 + 슬롯 보너스가 반영된 실효 분석 레벨 SSOT */
+export function getEffectiveAnalysisLevels(
+  state: GameState,
+  mercId?: string | null,
+  missionId?: string | null,
+): EffectiveAnalysisLevels {
+  const merc =
+    mercId != null && mercId !== ""
+      ? computeEffectiveMercLevel(state, mercId)
+      : getStationMercAnalysisBase(state);
+  const mission =
+    missionId != null && missionId !== ""
+      ? computeEffectiveMissionLevel(state, missionId)
+      : getStationMissionAnalysisBase(state);
+  return {
+    merc,
+    mission,
+    match: Math.min(merc, mission),
+  };
+}
+
+export function effectiveMercAnalysisLevel(state: GameState, mercId: string): number {
+  return computeEffectiveMercLevel(state, mercId);
+}
+
+export function effectiveMissionAnalysisLevel(state: GameState, missionId: string): number {
+  return computeEffectiveMissionLevel(state, missionId);
 }
 
 export function effectiveMatchAnalysisLevel(
@@ -106,8 +141,5 @@ export function effectiveMatchAnalysisLevel(
   mercId: string,
   missionId: string,
 ): number {
-  return Math.min(
-    effectiveMercAnalysisLevel(state, mercId),
-    effectiveMissionAnalysisLevel(state, missionId),
-  );
+  return getEffectiveAnalysisLevels(state, mercId, missionId).match;
 }

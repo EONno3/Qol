@@ -169,6 +169,7 @@ export function createMockGameState(overrides: Partial<GameState> = {}): GameSta
     mercStatuses: {},
     mercDissatisfactionStacks: {},
     analysisSlots: createEmptyAnalysisSlots(),
+    missionDecayTimers: {},
     gearStates: {},
     implantStates: {},
     gearOwner: {},

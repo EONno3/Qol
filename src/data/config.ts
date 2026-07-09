@@ -35,6 +35,11 @@ export const GAME_CONFIG = {
     /** 기대 지분 대비 1%p 미달당 불만도 스택 (D-F) */
     dissatisfactionPerPercentShortfall: 1,
   },
+  // 미션 방치(Decay) — 게시판 미션 카드 방치 시간(턴)
+  mission: {
+    /** 신규 게시 미션 기본 방치 잔여 턴 */
+    decayTurnsDefault: 3,
+  },
   // 미션 난이도 밸런스
   difficulty: {
     /** 기본 스탯 허들. statThreshold = base + (stars * perStar) */

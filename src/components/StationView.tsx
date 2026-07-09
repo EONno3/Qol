@@ -4,9 +4,8 @@ import { getUpgradeCost, getUpgradedStation, getHiringCost, getReplacementCost, 
 import { mercenaries as allMercs } from "../data/seed";
 import { getMercenary, getMission } from "../data/lookups";
 import {
-  effectiveMercAnalysisLevel,
-  effectiveMissionAnalysisLevel,
   getAnalysisBaseLevels,
+  getEffectiveAnalysisLevels,
 } from "../domain/analysisSlot";
 import { FACILITY_DEFINITIONS } from "../data/stationFacilities";
 import { STATUS_GEAR_DESTROYED, STATUS_GEAR_DESTROYED_JOKER, TIER_LABEL_KO } from "../data/constants";
@@ -213,7 +212,7 @@ export function StationView({
                 기관 베이스 Lv.{mercAnalysisBase}
                 {mercSlot.targetId && (
                   <> · 슬롯 보너스 +{mercSlot.bonusLevel} → effective Lv.
-                  {effectiveMercAnalysisLevel(state, mercSlot.targetId)}</>
+                  {getEffectiveAnalysisLevels(state, mercSlot.targetId).merc}</>
                 )}
               </p>
               <label htmlFor="merc-analysis-slot" className="muted" style={{ display: "block", marginTop: "0.75rem" }}>
@@ -241,7 +240,7 @@ export function StationView({
                 기관 베이스 Lv.{missionAnalysisBase}
                 {missionSlot.targetId && (
                   <> · 슬롯 보너스 +{missionSlot.bonusLevel} → effective Lv.
-                  {effectiveMissionAnalysisLevel(state, missionSlot.targetId)}</>
+                  {getEffectiveAnalysisLevels(state, null, missionSlot.targetId).mission}</>
                 )}
               </p>
               <label htmlFor="mission-analysis-slot" className="muted" style={{ display: "block", marginTop: "0.75rem" }}>

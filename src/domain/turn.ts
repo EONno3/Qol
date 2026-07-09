@@ -1,6 +1,7 @@
 import type { GameState } from "./state";
 import { missions } from "../data/seed";
 import { tickAnalysisSlotsOnTurnAdvance } from "./analysisSlot";
+import { tickMissionDecayOnTurnAdvance } from "./missionDecay";
 
 /**
  * 다음 날로 넘어가기 (Advance Turn)
@@ -37,12 +38,18 @@ export function advanceTurn(state: GameState): GameState {
     ...unlockedMissions.map(m => m.missionId)
   ];
 
+  const decayUpdate = tickMissionDecayOnTurnAdvance({
+    ...state,
+    availableMissions: newAvailableMissions,
+  });
+
   return {
     ...state,
     turnCount: state.turnCount + 1,
     currentCommandPoints: state.maxCommandPoints,
     ledger: state.ledger - maintenanceCost, // 빚(마이너스) 허용
-    availableMissions: newAvailableMissions,
+    availableMissions: decayUpdate.availableMissions,
+    missionDecayTimers: decayUpdate.missionDecayTimers,
     analysisSlots: tickAnalysisSlotsOnTurnAdvance(state),
   };
 }

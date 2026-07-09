@@ -390,6 +390,8 @@ export interface GameState {
   mercDissatisfactionStacks: Record<string, number>;
   /** 액티브 분석 슬롯 — 용병·미션 기관 각 1칸 (D-E) */
   analysisSlots: AnalysisSlotsState;
+  /** 게시판 미션별 방치 잔여 턴 (missionId → turns). D-E Decay 정지 연동 */
+  missionDecayTimers: Record<string, number>;
   gearStates: Record<string, GearStateValue>;
   implantStates: Record<string, GearStateValue>;
   gearOwner: Record<string, string>; // 새로 추가: 장비 ID별 소유 용병 ID 매핑
