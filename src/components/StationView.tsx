@@ -6,8 +6,7 @@ import { getMercenary, getMission } from "../data/lookups";
 import {
   effectiveMercAnalysisLevel,
   effectiveMissionAnalysisLevel,
-  getStationMercAnalysisBase,
-  getStationMissionAnalysisBase,
+  getAnalysisBaseLevels,
 } from "../domain/analysisSlot";
 import { FACILITY_DEFINITIONS } from "../data/stationFacilities";
 import { STATUS_GEAR_DESTROYED, STATUS_GEAR_DESTROYED_JOKER, TIER_LABEL_KO } from "../data/constants";
@@ -55,8 +54,7 @@ export function StationView({
   const facilityDef = FACILITY_DEFINITIONS[station.facilityId];
   const facilityUpgradeCost = getFacilityUpgradeCost(facilityTier);
   const canUpgradeFacility = facilityTier < 2 && state.ledger >= facilityUpgradeCost;
-  const mercAnalysisBase = getStationMercAnalysisBase(state);
-  const missionAnalysisBase = getStationMissionAnalysisBase(state);
+  const { merc: mercAnalysisBase, mission: missionAnalysisBase } = getAnalysisBaseLevels(state);
 
   // 용병 목록 필터링
   const hiredIds = state.hiredMercs || [];
@@ -212,7 +210,7 @@ export function StationView({
             <div className="station-card" style={{ background: "var(--panel-2)", padding: "1.25rem", border: "1px solid var(--panel-3)" }}>
               <h3 style={{ marginTop: 0, color: "var(--cyan)" }}>용병 분석 슬롯</h3>
               <p className="muted" style={{ fontSize: "0.9rem" }}>
-                기관 베이스 Lv.{station.analysisMercLv}
+                기관 베이스 Lv.{mercAnalysisBase}
                 {mercSlot.targetId && (
                   <> · 슬롯 보너스 +{mercSlot.bonusLevel} → effective Lv.
                   {effectiveMercAnalysisLevel(state, mercSlot.targetId)}</>
@@ -240,7 +238,7 @@ export function StationView({
             <div className="station-card" style={{ background: "var(--panel-2)", padding: "1.25rem", border: "1px solid var(--panel-3)" }}>
               <h3 style={{ marginTop: 0, color: "var(--cyan)" }}>미션 분석 슬롯</h3>
               <p className="muted" style={{ fontSize: "0.9rem" }}>
-                기관 베이스 Lv.{station.analysisMissionLv}
+                기관 베이스 Lv.{missionAnalysisBase}
                 {missionSlot.targetId && (
                   <> · 슬롯 보너스 +{missionSlot.bonusLevel} → effective Lv.
                   {effectiveMissionAnalysisLevel(state, missionSlot.targetId)}</>

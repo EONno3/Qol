@@ -142,6 +142,13 @@ describe("StationView 컴포넌트 단위 테스트", () => {
       expect(onAssignMercSlot).toHaveBeenCalledWith("merc_breaker_01");
     });
 
+    it("T-DD-UI-BIND-1: 업무 시설 버프가 반영된 기관 베이스 레벨을 표시한다", () => {
+      renderStation();
+      fireEvent.click(screen.getByText("분석 기관"));
+      expect(screen.getAllByText(/기관 베이스 Lv\.1/)).toHaveLength(2);
+      expect(screen.queryByText(/기관 베이스 Lv\.0/)).not.toBeInTheDocument();
+    });
+
     it("T-DE-UI-3: 슬롯 배치 중 bonusLevel·effective 표시", () => {
       const state = createMockGameState({
         stationState: createMockStationState({

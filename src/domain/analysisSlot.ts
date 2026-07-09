@@ -21,6 +21,19 @@ export function getStationMissionAnalysisBase(state: GameState): number {
   return Math.min(MAX_ANALYSIS_LEVEL, raw + getStationAnalysisFacilityBonus(state));
 }
 
+export type AnalysisBaseLevels = {
+  merc: number;
+  mission: number;
+};
+
+/** UI·도메인 공통: 시설 버프가 반영된 용병/미션 분석 베이스 레벨 */
+export function getAnalysisBaseLevels(state: GameState): AnalysisBaseLevels {
+  return {
+    merc: getStationMercAnalysisBase(state),
+    mission: getStationMissionAnalysisBase(state),
+  };
+}
+
 export function maxSlotBonusForBase(stationBase: number): number {
   return Math.max(0, MAX_ANALYSIS_LEVEL - stationBase);
 }

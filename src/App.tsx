@@ -14,7 +14,7 @@ import {
   createEmptyAnalysisSlots,
   effectiveMercAnalysisLevel,
   effectiveMissionAnalysisLevel,
-  getStationMercAnalysisBase,
+  getAnalysisBaseLevels,
 } from "./domain/analysisSlot";
 import { GAME_CONFIG } from "./data/config";
 import { buildNarratorWorldState } from "./domain/worldStateExport";
@@ -439,6 +439,8 @@ export function App({ initialState, bypassTitle = false }: { initialState?: Game
     );
   }
 
+  const analysisBaseLevels = getAnalysisBaseLevels(state);
+
   return (
     <div className="layout">
         <Sidebar
@@ -446,8 +448,8 @@ export function App({ initialState, bypassTitle = false }: { initialState?: Game
           acceptedCount={state.acceptedMissions.length}
           activeCount={state.activeDispatches.length}
           completedCount={state.completedDispatches.length}
-          stationMercBase={state.stationState?.analysisMercLv ?? 0}
-          stationMissionBase={state.stationState?.analysisMissionLv ?? 0}
+          stationMercBase={analysisBaseLevels.merc}
+          stationMissionBase={analysisBaseLevels.mission}
           mercSlotTargetId={state.analysisSlots.merc.targetId}
           missionSlotTargetId={state.analysisSlots.mission.targetId}
           mercSlotBonus={state.analysisSlots.merc.bonusLevel}
@@ -499,7 +501,7 @@ export function App({ initialState, bypassTitle = false }: { initialState?: Game
             mercAnalysisLevel={
               selectedMercId
                 ? effectiveMercAnalysisLevel(state, selectedMercId)
-                : getStationMercAnalysisBase(state)
+                : analysisBaseLevels.merc
             }
             missionAnalysisLevel={effectiveMissionAnalysisLevel(state, selectedMission.missionId)}
             selectedMercId={selectedMercId}

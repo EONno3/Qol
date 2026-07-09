@@ -1,7 +1,7 @@
 import { render, screen, fireEvent, waitFor, within } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 import { App } from "./App";
-import { createInitialState, createFixerProfileFromOrigin } from "./domain/state";
+import { createInitialState, createFixerProfileFromOrigin, createDefaultStation } from "./domain/state";
 import { GAME_CONFIG } from "./data/config";
 
 /** 테스트용: 기본 픽서 프로필이 설정된 초기 상태 (캐릭터 생성 화면 건너뜀) */
@@ -25,6 +25,24 @@ function createStateWithFixer() {
   };
 }
 
+
+describe("분석 베이스 UI 바인딩 (T-DD-UI-BIND)", () => {
+  it("T-DD-UI-BIND-2: 사이드바에 시설 버프가 반영된 분석 베이스 레벨을 표시한다", () => {
+    const state = createStateWithFixer();
+    const fixerId = state.fixerProfile!.fixerId;
+    render(
+      <App
+        initialState={{
+          ...state,
+          stationState: createDefaultStation(fixerId, "업무"),
+        }}
+      />,
+    );
+    const sidebar = screen.getByRole("navigation");
+    expect(within(sidebar).getByText(/용병 Lv\.1/)).toBeInTheDocument();
+    expect(within(sidebar).getByText(/미션 Lv\.1/)).toBeInTheDocument();
+  });
+});
 
 describe("App 1턴 루프", () => {
   it("성공 케이스: 미션 선택 → 매칭 → 슬라이드 출격 → 바로 정산", async () => {
