@@ -1,6 +1,44 @@
 import { GAME_CONFIG } from "../data/config";
 import type { GameState } from "./state";
 
+export type MissionDecayBoardContext = {
+  missionDecayTimers: Record<string, number>;
+  analysisMissionSlotId: string | null;
+};
+
+export type MissionDecayDisplay =
+  | { kind: "remaining"; turns: number }
+  | { kind: "paused" };
+
+export function getMissionDecayDisplay(
+  ctx: MissionDecayBoardContext,
+  missionId: string,
+): MissionDecayDisplay {
+  if (ctx.analysisMissionSlotId === missionId) {
+    return { kind: "paused" };
+  }
+  const turns =
+    ctx.missionDecayTimers[missionId] ?? GAME_CONFIG.mission.decayTurnsDefault;
+  return { kind: "remaining", turns };
+}
+
+export function getMissionDecayLabel(display: MissionDecayDisplay): string {
+  if (display.kind === "paused") {
+    return "분석 중 (만료 정지)";
+  }
+  return `방치 ${display.turns}턴`;
+}
+
+export function formatExpiredMissionNotice(expiredMissionIds: string[]): string | null {
+  if (expiredMissionIds.length === 0) {
+    return null;
+  }
+  if (expiredMissionIds.length === 1) {
+    return "의뢰 만료됨";
+  }
+  return `의뢰 ${expiredMissionIds.length}건 만료됨`;
+}
+
 export function getPausedMissionDecayId(state: GameState): string | null {
   return state.analysisSlots.mission.targetId;
 }
@@ -29,6 +67,7 @@ export function ensureMissionDecayTimers(state: GameState): Record<string, numbe
 export function tickMissionDecayOnTurnAdvance(state: GameState): {
   availableMissions: string[];
   missionDecayTimers: Record<string, number>;
+  expiredMissionIds: string[];
 } {
   const pausedMissionId = getPausedMissionDecayId(state);
   const timers = ensureMissionDecayTimers(state);
@@ -52,5 +91,6 @@ export function tickMissionDecayOnTurnAdvance(state: GameState): {
   return {
     availableMissions: state.availableMissions.filter((id) => !expired.includes(id)),
     missionDecayTimers: timers,
+    expiredMissionIds: expired,
   };
 }

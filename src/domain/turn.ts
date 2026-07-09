@@ -3,6 +3,11 @@ import { missions } from "../data/seed";
 import { tickAnalysisSlotsOnTurnAdvance } from "./analysisSlot";
 import { tickMissionDecayOnTurnAdvance } from "./missionDecay";
 
+export type AdvanceTurnResult = {
+  state: GameState;
+  expiredMissionIds: string[];
+};
+
 /**
  * 다음 날로 넘어가기 (Advance Turn)
  * - 턴 수를 1 올린다.
@@ -13,29 +18,26 @@ import { tickMissionDecayOnTurnAdvance } from "./missionDecay";
  *   원래 턴을 넘기기 전 강제로 정산하도록 UI에서 막을 수도 있고, 방치형이라면 이월할 수도 있다.
  *   여기서는 안전하게 이월(유지)한다.
  */
-export function advanceTurn(state: GameState): GameState {
+export function advanceTurnWithMeta(state: GameState): AdvanceTurnResult {
   const maintenanceCost = state.stationState?.operatingCostPerTurn ?? 0;
-  
-  // 후속 단서(Story Hooks)로 인해 해금되는 미션 찾기
+
   const unlockedMissions = missions.filter(m => {
     if (!m.requiredHookId) return false;
-    
-    // 이미 보드에 있거나, 수주했거나, 진행중/완료한 미션이면 제외
-    const alreadyExists = 
+
+    const alreadyExists =
       state.availableMissions.includes(m.missionId) ||
       state.acceptedMissions.includes(m.missionId) ||
       state.activeDispatches.some(d => d.missionId === m.missionId) ||
       state.completedDispatches.some(d => d.missionId === m.missionId);
-      
+
     if (alreadyExists) return false;
 
-    // 현재 보유한 후속 단서 중에 조건이 있는지 확인
     return state.followupHooks.includes(m.requiredHookId);
   });
 
   const newAvailableMissions = [
     ...state.availableMissions,
-    ...unlockedMissions.map(m => m.missionId)
+    ...unlockedMissions.map(m => m.missionId),
   ];
 
   const decayUpdate = tickMissionDecayOnTurnAdvance({
@@ -44,12 +46,19 @@ export function advanceTurn(state: GameState): GameState {
   });
 
   return {
-    ...state,
-    turnCount: state.turnCount + 1,
-    currentCommandPoints: state.maxCommandPoints,
-    ledger: state.ledger - maintenanceCost, // 빚(마이너스) 허용
-    availableMissions: decayUpdate.availableMissions,
-    missionDecayTimers: decayUpdate.missionDecayTimers,
-    analysisSlots: tickAnalysisSlotsOnTurnAdvance(state),
+    state: {
+      ...state,
+      turnCount: state.turnCount + 1,
+      currentCommandPoints: state.maxCommandPoints,
+      ledger: state.ledger - maintenanceCost,
+      availableMissions: decayUpdate.availableMissions,
+      missionDecayTimers: decayUpdate.missionDecayTimers,
+      analysisSlots: tickAnalysisSlotsOnTurnAdvance(state),
+    },
+    expiredMissionIds: decayUpdate.expiredMissionIds,
   };
+}
+
+export function advanceTurn(state: GameState): GameState {
+  return advanceTurnWithMeta(state).state;
 }

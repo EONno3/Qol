@@ -7,7 +7,8 @@ import { applySettlement, resolveReport } from "./domain/settlement";
 import { createInitialState, type GameState } from "./domain/state";
 import { weightMissions } from "./domain/world";
 import { clearGame, loadGame, saveGame } from "./domain/storage";
-import { advanceTurn } from "./domain/turn";
+import { advanceTurnWithMeta } from "./domain/turn";
+import { formatExpiredMissionNotice } from "./domain/missionDecay";
 import {
   assignMercAnalysisSlot,
   assignMissionAnalysisSlot,
@@ -132,6 +133,7 @@ export function App({ initialState, bypassTitle = false }: { initialState?: Game
   const [selectedMissionId, setSelectedMissionId] = useState<string | null>(null);
   const [selectedMercId, setSelectedMercId] = useState<string | null>(null);
   const [report, setReport] = useState<Report | null>(null);
+  const [turnNotice, setTurnNotice] = useState<string | null>(null);
 
   const hasSave = useMemo(() => {
     try {
@@ -315,6 +317,14 @@ export function App({ initialState, bypassTitle = false }: { initialState?: Game
     [state.availableMissions, state.fixerProfile, state.stationState],
   );
 
+  const missionDecayContext = useMemo(
+    () => ({
+      missionDecayTimers: state.missionDecayTimers,
+      analysisMissionSlotId: state.analysisSlots.mission.targetId,
+    }),
+    [state.missionDecayTimers, state.analysisSlots.mission.targetId],
+  );
+
   const acceptedMissionList = useMemo(
     () =>
       state.acceptedMissions
@@ -388,7 +398,9 @@ export function App({ initialState, bypassTitle = false }: { initialState?: Game
   }
 
   function handleAdvanceTurn() {
-    setState((s) => advanceTurn(s));
+    const result = advanceTurnWithMeta(state);
+    setState(result.state);
+    setTurnNotice(formatExpiredMissionNotice(result.expiredMissionIds));
     setSelectedMissionId(null);
     setSelectedMercId(null);
     setReport(null);
@@ -474,8 +486,35 @@ export function App({ initialState, bypassTitle = false }: { initialState?: Game
         />
 
       <main className="main">
+        {turnNotice && (
+          <div
+            className="turn-notice"
+            role="status"
+            style={{
+              marginBottom: "1rem",
+              padding: "0.75rem 1rem",
+              border: "1px solid var(--amber)",
+              background: "var(--panel-2)",
+              color: "var(--amber)",
+            }}
+          >
+            {turnNotice}
+            <button
+              type="button"
+              className="secondary"
+              style={{ marginLeft: "1rem" }}
+              onClick={() => setTurnNotice(null)}
+            >
+              닫기
+            </button>
+          </div>
+        )}
         {screen === "board" && (
-          <MissionBoard missions={availableMissions} onSelect={handleSelectMission} />
+          <MissionBoard
+            missions={availableMissions}
+            decayContext={missionDecayContext}
+            onSelect={handleSelectMission}
+          />
         )}
 
         {screen === "station" && (
