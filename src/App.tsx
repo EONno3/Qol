@@ -35,6 +35,7 @@ import { ResultReport } from "./components/ResultReport";
 import { Sidebar } from "./components/Sidebar";
 import { StatePanel } from "./components/StatePanel";
 import { StationView } from "./components/StationView";
+import { MercProfileView } from "./components/MercProfileView";
 import { upgradeStation, hireMercenary, fireMercenary, replaceDestroyedGear, upgradeFacilityTier } from "./domain/station";
 import { createDefaultStation, migrateLegacyStationState } from "./domain/state";
 import { TitleScreen } from "./components/TitleScreen";
@@ -48,6 +49,7 @@ type Screen =
   | "matching"
   | "desk" // AssignRun 대체
   | "station"
+  | "mercProfile"
   | "report"
   | "settled";
 
@@ -132,6 +134,7 @@ export function App({ initialState, bypassTitle = false }: { initialState?: Game
 
   const [selectedMissionId, setSelectedMissionId] = useState<string | null>(null);
   const [selectedMercId, setSelectedMercId] = useState<string | null>(null);
+  const [profileMercId, setProfileMercId] = useState<string | null>(null);
   const [report, setReport] = useState<Report | null>(null);
   const [turnNotice, setTurnNotice] = useState<string | null>(null);
 
@@ -424,7 +427,7 @@ export function App({ initialState, bypassTitle = false }: { initialState?: Game
       ? "board"
       : screen === "accepted" || screen === "matching"
         ? "accepted"
-        : screen === "station"
+        : screen === "station" || screen === "mercProfile"
           ? "station"
           : screen === "desk"
             ? "desk"
@@ -529,8 +532,33 @@ export function App({ initialState, bypassTitle = false }: { initialState?: Game
             onAssignMissionSlot={(missionId) =>
               setState((s) => assignMissionAnalysisSlot(s, missionId))
             }
+            onOpenMercProfile={(mercId) => {
+              setProfileMercId(mercId);
+              setScreen("mercProfile");
+            }}
           />
         )}
+
+        {screen === "mercProfile" && profileMercId && (() => {
+          const profileMerc = allMercs.find((m) => m.mercId === profileMercId);
+          if (!profileMerc) return null;
+          const isMarketMerc = !(state.hiredMercs ?? []).includes(profileMercId);
+          return (
+            <MercProfileView
+              merc={profileMerc}
+              mercAnalysisLevel={
+                isMarketMerc
+                  ? 0
+                  : getEffectiveAnalysisLevels(state, profileMercId).merc
+              }
+              isMarketMerc={isMarketMerc}
+              onBack={() => {
+                setProfileMercId(null);
+                setScreen("station");
+              }}
+            />
+          );
+        })()}
 
         {screen === "detail" && selectedMission && (
           <MissionDetail

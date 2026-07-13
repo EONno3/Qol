@@ -19,6 +19,7 @@ interface Props {
   onReplaceGear: (mercId: string) => void;
   onAssignMercSlot: (mercId: string | null) => void;
   onAssignMissionSlot: (missionId: string | null) => void;
+  onOpenMercProfile?: (mercId: string) => void;
 }
 
 export function StationView({
@@ -30,6 +31,7 @@ export function StationView({
   onReplaceGear,
   onAssignMercSlot,
   onAssignMissionSlot,
+  onOpenMercProfile,
 }: Props) {
   const [activeTab, setActiveTab] = useState<"infra" | "analysis" | "market" | "black_market">("infra");
   const station = state.stationState;
@@ -286,9 +288,18 @@ export function StationView({
                     <span className="muted" style={{ marginLeft: "0.5rem" }}>({m.displayNameKo})</span>
                     <div style={{ fontSize: "0.9rem", color: "var(--cyan)", marginTop: "4px" }}>지휘력 코스트: {m.commandCost} OP</div>
                   </div>
-                  <button className="danger" onClick={() => onFire(m.mercId)}>
-                    해고
-                  </button>
+                  <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
+                    <button
+                      className="ghost"
+                      aria-label={`${m.aliasKo} 프로필`}
+                      onClick={() => onOpenMercProfile?.(m.mercId)}
+                    >
+                      프로필
+                    </button>
+                    <button className="danger" onClick={() => onFire(m.mercId)}>
+                      해고
+                    </button>
+                  </div>
                 </div>
               ))}
             </div>
@@ -309,7 +320,14 @@ export function StationView({
                       <span className="muted" style={{ marginLeft: "0.5rem" }}>({m.displayNameKo})</span>
                       <div style={{ fontSize: "0.9rem", color: "var(--muted)", marginTop: "4px" }}>출신: {m.originKo} | 지휘력 코스트: {m.commandCost} OP</div>
                     </div>
-                    <div style={{ display: "flex", alignItems: "center", gap: "1rem" }}>
+                    <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
+                      <button
+                        className="ghost"
+                        aria-label={`${m.aliasKo} 프로필`}
+                        onClick={() => onOpenMercProfile?.(m.mercId)}
+                      >
+                        프로필
+                      </button>
                       <span style={{ color: canHire ? "var(--cyan)" : "var(--danger)" }}>{cost.toLocaleString()} cr</span>
                       <button 
                         className="primary" 

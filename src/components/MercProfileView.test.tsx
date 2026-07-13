@@ -49,7 +49,7 @@ describe("MercProfileView 독립 용병 프로필 (T-DD-MERC-PROFILE)", () => {
     expect(screen.getByText("Phase0 기본 이력 텍스트")).toBeInTheDocument();
     expect(screen.queryByText("Phase1 활동 성향 텍스트")).not.toBeInTheDocument();
     expect(screen.queryByText("Phase2 태그 상세 텍스트")).not.toBeInTheDocument();
-    expect(screen.getByText(/이력서/)).toBeInTheDocument();
+    expect(screen.getByRole("tab", { name: "이력서" })).toBeInTheDocument();
   });
 
   it("T-DD-MERC-PROFILE-2: StationView 소속·시장 목록에서 프로필 진입 콜백이 호출된다", () => {
@@ -72,8 +72,7 @@ describe("MercProfileView 독립 용병 프로필 (T-DD-MERC-PROFILE)", () => {
         onReplaceGear={vi.fn()}
         onAssignMercSlot={vi.fn()}
         onAssignMissionSlot={vi.fn()}
-        // Red: StationView에 onOpenMercProfile 배선 전 — Feat에서 연결
-        {...({ onOpenMercProfile } as Record<string, unknown>)}
+        onOpenMercProfile={onOpenMercProfile}
       />
     );
 
