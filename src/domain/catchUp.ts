@@ -25,7 +25,7 @@ function hashSeed(text: string): number {
 
 export interface SelectCatchUpParams {
   mission: Mission;
-  /** 유효 분석 레벨 L = min(용병, 미션). L>=2에서만 픽서가 노드를 직접 지정 가능 */
+  /** Option B: 매칭 예측 레벨(predictAnalysisLv). L>=2에서만 픽서가 노드를 직접 지정 가능 */
   analysisLevel: number;
   /** 픽서가 UI에서 지정한 노드 이름 (L>=2에서만 유효) */
   picked?: string[];

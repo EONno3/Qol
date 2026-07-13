@@ -7,8 +7,12 @@ export function canDeploy(match: MatchCase): boolean {
   return match.deploymentVerdict !== "locked";
 }
 
-export function effectiveAnalysisLevel(mercLevel: number, missionLevel: number): number {
-  return Math.min(mercLevel, missionLevel);
+/**
+ * Option B: 매칭·캐치업 게이트는 `predictAnalysisLv` 단일 축.
+ * (구 `min(용병 분석, 미션 분석)` 폐기 — 인자 1개만 받는다.)
+ */
+export function effectiveAnalysisLevel(predictLevel: number): number {
+  return Math.max(0, predictLevel);
 }
 
 export interface VisibleMatchInfo {

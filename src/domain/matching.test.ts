@@ -35,10 +35,11 @@ describe("canDeploy", () => {
   });
 });
 
-describe("effectiveAnalysisLevel", () => {
-  it("두 분석 레벨 중 낮은 값을 따른다", () => {
-    expect(effectiveAnalysisLevel(2, 1)).toBe(1);
-    expect(effectiveAnalysisLevel(0, 2)).toBe(0);
+describe("effectiveAnalysisLevel (Option B: predict 단일 축)", () => {
+  it("predictAnalysisLv를 그대로 게이트 레벨로 쓴다", () => {
+    expect(effectiveAnalysisLevel(2)).toBe(2);
+    expect(effectiveAnalysisLevel(0)).toBe(0);
+    expect(effectiveAnalysisLevel(1)).toBe(1);
   });
 });
 

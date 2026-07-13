@@ -203,7 +203,7 @@ describe("MercMatching B-2 force_risk UI (T-B2-UI-FR)", () => {
   });
 });
 
-// B-4 밸런스 노출: 예상 생존율 변동 패널. 유효 레벨 L=min(용병,미션) 분석 레벨에 따라
+// B-4 survival panel: Option B predictAnalysisLv gate (was min merc/mission).
 // 노출 깊이를 차등한다(L0 비공개 / L1 구역 기본만 / L2 태그 보정+최종까지).
 describe("MercMatching B-4 생존율 노출 UI (T-B4-UI)", () => {
   const upperMission = createMockMission({
