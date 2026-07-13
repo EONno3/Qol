@@ -81,7 +81,7 @@ describe("getMissionWeight - 스테이션 위치 기반 가중치", () => {
         level: 1,
         operatingCostPerTurn: 0,
         analysisMissionLv: 0,
-        analysisMercLv: 0,
+        predictAnalysisLv: 0,
       },
     };
     expect(getMissionWeight(lowerMission, statedState)).toBeCloseTo(1.5);
@@ -106,7 +106,7 @@ describe("getMissionWeight - 스테이션 위치 기반 가중치", () => {
         level: 1,
         operatingCostPerTurn: 0,
         analysisMissionLv: 0,
-        analysisMercLv: 0,
+        predictAnalysisLv: 0,
       },
     };
     // 중층 스테이션 기준: mid ×1.4, lower ×0.8

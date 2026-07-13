@@ -115,7 +115,7 @@ export function createMockStationState(overrides: Partial<StationState> = {}): S
     locationArea: "UNzone",
     level: 1,
     operatingCostPerTurn: 1000,
-    analysisMercLv: 0,
+    predictAnalysisLv: 0,
     analysisMissionLv: 0,
     ...overrides,
   };

@@ -3,11 +3,9 @@ interface Props {
   acceptedCount: number;
   activeCount: number;
   completedCount: number;
-  stationMercBase: number;
+  stationPredictBase: number;
   stationMissionBase: number;
-  mercSlotTargetId: string | null;
   missionSlotTargetId: string | null;
-  mercSlotProgress: number;
   missionSlotProgress: number;
   onGoBoard: () => void;
   onGoAccepted: () => void;
@@ -21,11 +19,9 @@ export function Sidebar({
   acceptedCount,
   activeCount,
   completedCount,
-  stationMercBase,
+  stationPredictBase,
   stationMissionBase,
-  mercSlotTargetId,
   missionSlotTargetId,
-  mercSlotProgress,
   missionSlotProgress,
   onGoBoard,
   onGoAccepted,
@@ -72,15 +68,6 @@ export function Sidebar({
       <div className="sidebar-analysis">
         <div className="sidebar-section-label">분석 기관 (베이스)</div>
         <div className="muted" style={{ fontSize: "0.9rem", lineHeight: 1.5 }}>
-          용병 Lv.{stationMercBase}
-          {mercSlotTargetId && (
-            <span style={{ color: "var(--cyan)" }}>
-              {" "}
-              · 슬롯 +{mercSlotProgress}
-            </span>
-          )}
-        </div>
-        <div className="muted" style={{ fontSize: "0.9rem", lineHeight: 1.5, marginTop: "0.25rem" }}>
           미션 Lv.{stationMissionBase}
           {missionSlotTargetId && (
             <span style={{ color: "var(--cyan)" }}>
@@ -88,6 +75,10 @@ export function Sidebar({
               · 슬롯 +{missionSlotProgress}
             </span>
           )}
+        </div>
+        <div className="muted" style={{ fontSize: "0.9rem", lineHeight: 1.5, marginTop: "0.25rem" }}>
+          매칭 예측 Lv.{stationPredictBase}
+          <span style={{ color: "var(--muted)" }}> (슬롯 준비 중)</span>
         </div>
         <div className="sidebar-effective" style={{ marginTop: "0.5rem" }}>
           슬롯 배치는 스테이션 「분석 기관」 탭에서 설정

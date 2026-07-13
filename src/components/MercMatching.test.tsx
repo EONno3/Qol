@@ -19,8 +19,7 @@ function renderMatching(overrides: Partial<Parameters<typeof MercMatching>[0]> =
   const defaults = {
     mission: mockMission,
     mercenaries: [mockMerc],
-    mercAnalysisLevel: 2,
-    missionAnalysisLevel: 2,
+    predictAnalysisLevel: 2,
     selectedMercId: null as string | null,
     currentCommandPoints: 10,
     busyMercIds: [] as string[],
@@ -92,8 +91,7 @@ describe("MercMatching 컴포넌트 단위 테스트", () => {
       mercenaries: [breaker],
       selectedMercId: "merc_breaker_01",
       loadout: breakerLoadout,
-      mercAnalysisLevel: 2,
-      missionAnalysisLevel: 2,
+      predictAnalysisLevel: 2,
     });
 
     expect(screen.getByText(/와이어 54/)).toBeInTheDocument();
@@ -220,18 +218,17 @@ describe("MercMatching B-4 생존율 노출 UI (T-B4-UI)", () => {
     systemTags: ["tag_origin_slum_native"],
   });
 
-  function renderB4(merc: number, mission: number) {
+  function renderB4(predictLevel: number) {
     return renderMatching({
       mission: upperMission,
       mercenaries: [slumMerc],
       selectedMercId: "merc_b4_slum",
-      mercAnalysisLevel: merc,
-      missionAnalysisLevel: mission,
+      predictAnalysisLevel: predictLevel,
     });
   }
 
   it("T-B4-UI-0: L0(미분석)이면 수치 없이 '생존율 예측 불가'만 노출된다", () => {
-    renderB4(0, 0);
+    renderB4(0);
     expect(screen.getByText(/생존율 예측 불가/)).toBeInTheDocument();
     expect(screen.queryByText(/기본 생존율/)).not.toBeInTheDocument();
     expect(screen.queryByText(/최종 예상 생존율/)).not.toBeInTheDocument();
@@ -239,7 +236,7 @@ describe("MercMatching B-4 생존율 노출 UI (T-B4-UI)", () => {
   });
 
   it("T-B4-UI-1: L1(기본 분석)이면 구역 기본 생존율까지만 공개(태그 보정 숨김)", () => {
-    renderB4(1, 1);
+    renderB4(1);
     expect(screen.getByText(/기본 생존율 20%/)).toBeInTheDocument();
     // Lv1에서는 용병 태그 보정과 최종 합산치를 공개하지 않는다.
     expect(screen.queryByText(/상층 슬럼 출신 약점/)).not.toBeInTheDocument();
@@ -247,16 +244,15 @@ describe("MercMatching B-4 생존율 노출 UI (T-B4-UI)", () => {
   });
 
   it("T-B4-UI-2: L2(심층 분석)이면 구역 기본 + 태그 보정(-30%) + 최종 생존율까지 투명 공개", () => {
-    renderB4(2, 2);
+    renderB4(2);
     expect(screen.getByText(/기본 생존율 20%/)).toBeInTheDocument();
     expect(screen.getByText(/상층 슬럼 출신 약점/)).toBeInTheDocument();
     expect(screen.getByText(/-30%/)).toBeInTheDocument();
     expect(screen.getByText(/최종 예상 생존율/)).toBeInTheDocument();
   });
 
-  it("T-B4-UI-3: 미션 분석만 높고 용병 분석이 낮으면(min=1) 태그 보정은 잠긴다(정보 분리)", () => {
-    // mercAnalysisLevel 0, missionAnalysisLevel 2 → L=min=0 → 예측 불가
-    renderB4(0, 2);
+  it("T-B4-UI-3: predictAnalysisLevel 0이면 예측 불가 (Option B: predict 단일 축)", () => {
+    renderB4(0);
     expect(screen.getByText(/생존율 예측 불가/)).toBeInTheDocument();
     expect(screen.queryByText(/상층 슬럼 출신 약점/)).not.toBeInTheDocument();
   });
@@ -270,8 +266,7 @@ describe("MercMatching 캐치업 현장 개입 UI (T-DC-UI-CU)", () => {
       mission: createMockMission({ missionId: "catch_mission" }),
       mercenaries: [catchMerc],
       selectedMercId: "catch_merc",
-      mercAnalysisLevel: level,
-      missionAnalysisLevel: level,
+      predictAnalysisLevel: level,
       currentCommandPoints: 10,
       ...overrides,
     });

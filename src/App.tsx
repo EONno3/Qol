@@ -10,7 +10,6 @@ import { clearGame, loadGame, saveGame } from "./domain/storage";
 import { advanceTurnWithMeta } from "./domain/turn";
 import { formatExpiredMissionNotice } from "./domain/missionDecay";
 import {
-  assignMercAnalysisSlot,
   assignMissionAnalysisSlot,
   createEmptyAnalysisSlots,
   getAnalysisBaseLevels,
@@ -106,8 +105,8 @@ export function App({ initialState, bypassTitle = false }: { initialState?: Game
         analysisSlots: migrateAnalysisSlots(loadedState.analysisSlots),
       };
     }
-    // 호환성 패치 6: facilityId/facilityTier 누락 구세이브 보강
-    if (loadedState.stationState && !loadedState.stationState.facilityId) {
+    // 호환성 패치 6: stationState 구세이브 마이그레이션 (facility + predictAnalysisLv)
+    if (loadedState.stationState) {
       loadedState = {
         ...loadedState,
         stationState: migrateLegacyStationState(loadedState.stationState),
@@ -468,6 +467,16 @@ export function App({ initialState, bypassTitle = false }: { initialState?: Game
 
   const analysisBaseLevels = getAnalysisBaseLevels(state);
 
+  function resolveEquippedNames(mercId: string) {
+    const gearNames = Object.entries(state.gearOwner)
+      .filter(([, ownerId]) => ownerId === mercId)
+      .map(([gearId]) => gearDefs.find((g) => g.gearId === gearId)?.displayNameKo ?? gearId);
+    const implantNames = Object.entries(state.implantOwner)
+      .filter(([, ownerId]) => ownerId === mercId)
+      .map(([implantId]) => implantDefs.find((i) => i.implantId === implantId)?.displayNameKo ?? implantId);
+    return { gearNames, implantNames };
+  }
+
   return (
     <div className="layout">
         <Sidebar
@@ -475,11 +484,9 @@ export function App({ initialState, bypassTitle = false }: { initialState?: Game
           acceptedCount={state.acceptedMissions.length}
           activeCount={state.activeDispatches.length}
           completedCount={state.completedDispatches.length}
-          stationMercBase={analysisBaseLevels.merc}
+          stationPredictBase={analysisBaseLevels.predict}
           stationMissionBase={analysisBaseLevels.mission}
-          mercSlotTargetId={state.analysisSlots.merc.targetId}
           missionSlotTargetId={state.analysisSlots.mission.targetId}
-          mercSlotProgress={state.analysisSlots.merc.progress}
           missionSlotProgress={state.analysisSlots.mission.progress}
           onGoBoard={() => setScreen("board")}
           onGoAccepted={() => setScreen("accepted")}
@@ -528,7 +535,6 @@ export function App({ initialState, bypassTitle = false }: { initialState?: Game
             onHire={(mercId) => setState((s) => hireMercenary(s, mercId))}
             onFire={(mercId) => setState((s) => fireMercenary(s, mercId))}
             onReplaceGear={(mercId) => setState((s) => replaceDestroyedGear(s, mercId))}
-            onAssignMercSlot={(mercId) => setState((s) => assignMercAnalysisSlot(s, mercId))}
             onAssignMissionSlot={(missionId) =>
               setState((s) => assignMissionAnalysisSlot(s, missionId))
             }
@@ -542,16 +548,12 @@ export function App({ initialState, bypassTitle = false }: { initialState?: Game
         {screen === "mercProfile" && profileMercId && (() => {
           const profileMerc = allMercs.find((m) => m.mercId === profileMercId);
           if (!profileMerc) return null;
-          const isMarketMerc = !(state.hiredMercs ?? []).includes(profileMercId);
+          const { gearNames, implantNames } = resolveEquippedNames(profileMercId);
           return (
             <MercProfileView
               merc={profileMerc}
-              mercAnalysisLevel={
-                isMarketMerc
-                  ? 0
-                  : getEffectiveAnalysisLevels(state, profileMercId).merc
-              }
-              isMarketMerc={isMarketMerc}
+              equippedGearNames={gearNames}
+              equippedImplantNames={implantNames}
               onBack={() => {
                 setProfileMercId(null);
                 setScreen("station");
@@ -579,11 +581,8 @@ export function App({ initialState, bypassTitle = false }: { initialState?: Game
           <MercMatching
             mission={selectedMission}
             mercenaries={allMercs.filter((m) => state.hiredMercs?.includes(m.mercId))}
-            mercAnalysisLevel={
-              getEffectiveAnalysisLevels(state, selectedMercId, selectedMission.missionId).merc
-            }
-            missionAnalysisLevel={
-              getEffectiveAnalysisLevels(state, selectedMercId, selectedMission.missionId).mission
+            predictAnalysisLevel={
+              getEffectiveAnalysisLevels(state, selectedMercId, selectedMission.missionId).predict
             }
             selectedMercId={selectedMercId}
             currentCommandPoints={state.currentCommandPoints}

@@ -39,8 +39,8 @@ describe("분석 베이스 UI 바인딩 (T-DD-UI-BIND)", () => {
       />,
     );
     const sidebar = screen.getByRole("navigation");
-    expect(within(sidebar).getByText(/용병 Lv\.1/)).toBeInTheDocument();
     expect(within(sidebar).getByText(/미션 Lv\.1/)).toBeInTheDocument();
+    expect(within(sidebar).getByText(/매칭 예측 Lv\.1/)).toBeInTheDocument();
   });
 });
 

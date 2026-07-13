@@ -17,10 +17,11 @@ interface Props {
   onHire: (mercId: string) => void;
   onFire: (mercId: string) => void;
   onReplaceGear: (mercId: string) => void;
-  onAssignMercSlot: (mercId: string | null) => void;
   onAssignMissionSlot: (missionId: string | null) => void;
   onOpenMercProfile?: (mercId: string) => void;
 }
+
+type StationTab = "infra" | "analysis" | "roster" | "market" | "black_market";
 
 export function StationView({
   state,
@@ -29,11 +30,10 @@ export function StationView({
   onHire,
   onFire,
   onReplaceGear,
-  onAssignMercSlot,
   onAssignMissionSlot,
   onOpenMercProfile,
 }: Props) {
-  const [activeTab, setActiveTab] = useState<"infra" | "analysis" | "market" | "black_market">("infra");
+  const [activeTab, setActiveTab] = useState<StationTab>("infra");
   const station = state.stationState;
 
   if (!station) {
@@ -55,15 +55,22 @@ export function StationView({
   const facilityDef = FACILITY_DEFINITIONS[station.facilityId];
   const facilityUpgradeCost = getFacilityUpgradeCost(facilityTier);
   const canUpgradeFacility = facilityTier < 2 && state.ledger >= facilityUpgradeCost;
-  const { merc: mercAnalysisBase, mission: missionAnalysisBase } = getAnalysisBaseLevels(state);
+  const { mission: missionAnalysisBase, predict: predictAnalysisBase } = getAnalysisBaseLevels(state);
 
-  // 용병 목록 필터링
   const hiredIds = state.hiredMercs || [];
   const hiredMercs = hiredIds.map(id => getMercenary(id)).filter(Boolean) as typeof allMercs;
   const availableMarketMercs = allMercs.filter(m => !hiredIds.includes(m.mercId));
   const missionSlotCandidates = [...new Set([...state.availableMissions, ...state.acceptedMissions])];
-  const mercSlot = state.analysisSlots.merc;
   const missionSlot = state.analysisSlots.mission;
+
+  const tabButtonStyle = (tab: StationTab) => ({
+    background: "none" as const,
+    border: "none" as const,
+    color: activeTab === tab ? "var(--cyan)" : "var(--muted)",
+    fontWeight: activeTab === tab ? ("bold" as const) : ("normal" as const),
+    cursor: "pointer" as const,
+    fontSize: "1.1rem",
+  });
 
   return (
     <section className="station-view">
@@ -71,32 +78,41 @@ export function StationView({
         <h2>스테이션 관리</h2>
       </div>
 
-      <div className="tabs" style={{ display: "flex", gap: "1rem", marginBottom: "1.5rem", borderBottom: "1px solid var(--panel-2)", paddingBottom: "0.5rem" }}>
-        <button 
+      <div className="tabs" style={{ display: "flex", gap: "1rem", marginBottom: "1.5rem", borderBottom: "1px solid var(--panel-2)", paddingBottom: "0.5rem", flexWrap: "wrap" }}>
+        <button
           className={`tab-btn ${activeTab === "infra" ? "active" : ""}`}
           onClick={() => setActiveTab("infra")}
-          style={{ background: "none", border: "none", color: activeTab === "infra" ? "var(--cyan)" : "var(--muted)", fontWeight: activeTab === "infra" ? "bold" : "normal", cursor: "pointer", fontSize: "1.1rem" }}
+          style={tabButtonStyle("infra")}
         >
           인프라 관리
         </button>
-        <button 
+        <button
           className={`tab-btn ${activeTab === "analysis" ? "active" : ""}`}
           onClick={() => setActiveTab("analysis")}
-          style={{ background: "none", border: "none", color: activeTab === "analysis" ? "var(--cyan)" : "var(--muted)", fontWeight: activeTab === "analysis" ? "bold" : "normal", cursor: "pointer", fontSize: "1.1rem" }}
+          style={tabButtonStyle("analysis")}
         >
           분석 기관
         </button>
-        <button 
+        <button
+          className={`tab-btn ${activeTab === "roster" ? "active" : ""}`}
+          data-testid="station-tab-roster"
+          onClick={() => setActiveTab("roster")}
+          style={tabButtonStyle("roster")}
+        >
+          소속 용병
+        </button>
+        <button
           className={`tab-btn ${activeTab === "market" ? "active" : ""}`}
+          data-testid="station-tab-market"
           onClick={() => setActiveTab("market")}
-          style={{ background: "none", border: "none", color: activeTab === "market" ? "var(--cyan)" : "var(--muted)", fontWeight: activeTab === "market" ? "bold" : "normal", cursor: "pointer", fontSize: "1.1rem" }}
+          style={tabButtonStyle("market")}
         >
           용병 고용소
         </button>
-        <button 
+        <button
           className={`tab-btn ${activeTab === "black_market" ? "active" : ""}`}
           onClick={() => setActiveTab("black_market")}
-          style={{ background: "none", border: "none", color: activeTab === "black_market" ? "var(--cyan)" : "var(--muted)", fontWeight: activeTab === "black_market" ? "bold" : "normal", cursor: "pointer", fontSize: "1.1rem" }}
+          style={tabButtonStyle("black_market")}
         >
           암시장(무기 재수급)
         </button>
@@ -111,7 +127,7 @@ export function StationView({
                 시설 T{facilityTier} · 인프라 Lv.{currentLevel}
               </span>
             </h3>
-            
+
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1rem", marginTop: "1rem" }}>
               <div>
                 <div className="muted">카테고리</div>
@@ -134,8 +150,8 @@ export function StationView({
                 <div style={{ color: "var(--cyan)" }}>{state.maxCommandPoints} OP</div>
               </div>
               <div>
-                <div className="muted">분석 베이스 (용병 / 미션)</div>
-                <div>Lv.{mercAnalysisBase} / Lv.{missionAnalysisBase}</div>
+                <div className="muted">분석 베이스 (미션 / 매칭 예측)</div>
+                <div>Lv.{missionAnalysisBase} / Lv.{predictAnalysisBase}</div>
               </div>
             </div>
             {station.category !== "업무" && (
@@ -175,7 +191,7 @@ export function StationView({
           <div className="station-upgrade-card" style={{ background: "var(--bg)", padding: "1.5rem", border: "1px dashed var(--muted)", marginTop: "2rem" }}>
             <h3>인프라 레벨 업그레이드 (Lv.{currentLevel} → Lv.{currentLevel + 1})</h3>
             <p className="muted" style={{ fontSize: "0.9rem" }}>지휘력(OP) 상한·턴 유지비만 상승합니다. 분석 베이스는 시설 투자로 별도 관리됩니다.</p>
-            
+
             {upgradedPreview && (
               <ul style={{ paddingLeft: "1.5rem", margin: "1rem 0", lineHeight: "1.6" }}>
                 <li>최대 지휘력: {state.maxCommandPoints} OP ➜ <strong style={{ color: "var(--cyan)" }}>{state.maxCommandPoints + 2} OP</strong></li>
@@ -187,9 +203,9 @@ export function StationView({
               <div style={{ fontSize: "1.1rem" }}>
                 비용: <strong style={{ color: canUpgrade ? "var(--cyan)" : "var(--danger)" }}>{upgradeCost.toLocaleString()} cr</strong>
               </div>
-              <button 
-                className="primary" 
-                onClick={onUpgrade} 
+              <button
+                className="primary"
+                onClick={onUpgrade}
                 disabled={!canUpgrade}
                 title={canUpgrade ? "스테이션을 업그레이드합니다." : "크레딧이 부족합니다."}
               >
@@ -203,39 +219,11 @@ export function StationView({
       {activeTab === "analysis" && (
         <div className="tab-content">
           <p className="muted" style={{ marginBottom: "1rem" }}>
-            용병·미션 분석 기관에 각 1개씩 배치하면 턴이 지날 때마다 해당 대상의 분석 깊이가 임시로 +1됩니다 (최대 Lv.2).
+            미션 분석 기관에 1개 배치하면 턴이 지날 때마다 해당 미션의 분석 깊이가 임시로 +1됩니다 (최대 Lv.2).
             슬롯에서 빼면 보너스는 즉시 사라집니다.
           </p>
 
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1.5rem" }}>
-            <div className="station-card" style={{ background: "var(--panel-2)", padding: "1.25rem", border: "1px solid var(--panel-3)" }}>
-              <h3 style={{ marginTop: 0, color: "var(--cyan)" }}>용병 분석 슬롯</h3>
-              <p className="muted" style={{ fontSize: "0.9rem" }}>
-                기관 베이스 Lv.{mercAnalysisBase}
-                {mercSlot.targetId && (
-                  <> · 슬롯 보너스 +{mercSlot.progress} → effective Lv.
-                  {getEffectiveAnalysisLevels(state, mercSlot.targetId).merc}</>
-                )}
-              </p>
-              <label htmlFor="merc-analysis-slot" className="muted" style={{ display: "block", marginTop: "0.75rem" }}>
-                배치 용병
-              </label>
-              <select
-                id="merc-analysis-slot"
-                aria-label="용병 분석 슬롯"
-                value={mercSlot.targetId ?? ""}
-                onChange={(e) => onAssignMercSlot(e.target.value || null)}
-                style={{ width: "100%", marginTop: "0.25rem" }}
-              >
-                <option value="">(비움)</option>
-                {hiredMercs.map((m) => (
-                  <option key={m.mercId} value={m.mercId}>
-                    {m.aliasKo}
-                  </option>
-                ))}
-              </select>
-            </div>
-
             <div className="station-card" style={{ background: "var(--panel-2)", padding: "1.25rem", border: "1px solid var(--panel-3)" }}>
               <h3 style={{ marginTop: 0, color: "var(--cyan)" }}>미션 분석 슬롯</h3>
               <p className="muted" style={{ fontSize: "0.9rem" }}>
@@ -266,23 +254,61 @@ export function StationView({
                 })}
               </select>
             </div>
+
+            <div className="station-card" style={{ background: "var(--panel-2)", padding: "1.25rem", border: "1px solid var(--panel-3)" }}>
+              <h3 style={{ marginTop: 0, color: "var(--cyan)" }}>매칭 예측 분석</h3>
+              <p className="muted" style={{ fontSize: "0.9rem" }}>
+                기관 베이스 Lv.{predictAnalysisBase}
+              </p>
+              <div
+                style={{
+                  marginTop: "1rem",
+                  padding: "1rem",
+                  border: "1px dashed var(--muted)",
+                  background: "var(--bg)",
+                  color: "var(--muted)",
+                }}
+              >
+                준비 중 — 매칭 예측 슬롯은 추후 업데이트에서 제공됩니다.
+              </div>
+            </div>
           </div>
         </div>
       )}
 
-      {activeTab === "market" && (
-        <div className="tab-content">
+      {activeTab === "roster" && (
+        <div className="tab-content" data-testid="station-roster-panel">
           <p className="muted" style={{ marginBottom: "1.5rem" }}>
-            시장에 나와있는 프리랜서 용병들을 고용하거나, 현재 소속된 용병을 해고할 수 있습니다.
+            현재 소속된 용병 명단입니다. 카드를 클릭하거나 프로필 버튼으로 상세 정보를 확인할 수 있습니다.
           </p>
 
-          <h3 style={{ borderBottom: "1px solid var(--panel-2)", paddingBottom: "0.5rem" }}>소속 용병 명단</h3>
           {hiredMercs.length === 0 ? (
             <div className="muted" style={{ padding: "1rem" }}>고용된 용병이 없습니다.</div>
           ) : (
-            <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem", marginBottom: "2rem" }}>
+            <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>
               {hiredMercs.map(m => (
-                <div key={m.mercId} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", background: "var(--panel)", padding: "1rem", border: "1px solid var(--green)" }}>
+                <div
+                  key={m.mercId}
+                  data-testid={`roster-card-${m.mercId}`}
+                  role="button"
+                  tabIndex={0}
+                  onClick={() => onOpenMercProfile?.(m.mercId)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" || e.key === " ") {
+                      e.preventDefault();
+                      onOpenMercProfile?.(m.mercId);
+                    }
+                  }}
+                  style={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    alignItems: "center",
+                    background: "var(--panel)",
+                    padding: "1rem",
+                    border: "1px solid var(--green)",
+                    cursor: onOpenMercProfile ? "pointer" : "default",
+                  }}
+                >
                   <div>
                     <span style={{ fontWeight: "bold", fontSize: "1.1rem" }}>{m.aliasKo}</span>
                     <span className="muted" style={{ marginLeft: "0.5rem" }}>({m.displayNameKo})</span>
@@ -292,11 +318,20 @@ export function StationView({
                     <button
                       className="ghost"
                       aria-label={`${m.aliasKo} 프로필`}
-                      onClick={() => onOpenMercProfile?.(m.mercId)}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onOpenMercProfile?.(m.mercId);
+                      }}
                     >
                       프로필
                     </button>
-                    <button className="danger" onClick={() => onFire(m.mercId)}>
+                    <button
+                      className="danger"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onFire(m.mercId);
+                      }}
+                    >
                       해고
                     </button>
                   </div>
@@ -304,8 +339,15 @@ export function StationView({
               ))}
             </div>
           )}
+        </div>
+      )}
 
-          <h3 style={{ borderBottom: "1px solid var(--panel-2)", paddingBottom: "0.5rem" }}>용병 시장 (고용 가능)</h3>
+      {activeTab === "market" && (
+        <div className="tab-content" data-testid="station-market-panel">
+          <p className="muted" style={{ marginBottom: "1.5rem" }}>
+            시장에 나와있는 프리랜서 용병을 고용할 수 있습니다.
+          </p>
+
           {availableMarketMercs.length === 0 ? (
             <div className="muted" style={{ padding: "1rem" }}>고용 가능한 용병이 없습니다.</div>
           ) : (
@@ -329,8 +371,8 @@ export function StationView({
                         프로필
                       </button>
                       <span style={{ color: canHire ? "var(--cyan)" : "var(--danger)" }}>{cost.toLocaleString()} cr</span>
-                      <button 
-                        className="primary" 
+                      <button
+                        className="primary"
                         onClick={() => onHire(m.mercId)}
                         disabled={!canHire}
                         title={canHire ? "고용 계약을 체결합니다." : "자금이 부족합니다."}
@@ -354,7 +396,7 @@ export function StationView({
           </p>
 
           <h3 style={{ borderBottom: "1px solid var(--panel-2)", paddingBottom: "0.5rem", color: "var(--danger)" }}>파손 상태의 용병 목록</h3>
-          
+
           <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>
             {(() => {
               const replacementCost = getReplacementCost(state);
@@ -371,8 +413,8 @@ export function StationView({
                   </div>
                   <div style={{ display: "flex", alignItems: "center", gap: "1rem" }}>
                     <span style={{ color: canReplace ? "var(--cyan)" : "var(--danger)" }}>{replacementCost.toLocaleString()} cr</span>
-                    <button 
-                      className="primary" 
+                    <button
+                      className="primary"
                       onClick={() => onReplaceGear(m.mercId)}
                       disabled={!canReplace}
                       title={canReplace ? `${replacementCost.toLocaleString()} CR을 지불하고 장비를 재수급합니다.` : "자금이 부족합니다."}
@@ -384,7 +426,7 @@ export function StationView({
                 </div>
               ));
             })()}
-            
+
             {hiredMercs.filter(m => {
               const s = state.mercStatuses[m.mercId] || [];
               return s.includes(STATUS_GEAR_DESTROYED) || s.includes(STATUS_GEAR_DESTROYED_JOKER);

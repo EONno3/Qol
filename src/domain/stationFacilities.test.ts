@@ -15,7 +15,7 @@ import {
   getFacilityUpgradeCost,
   upgradeFacilityTier,
 } from "./station";
-import { getStationMercAnalysisBase } from "./analysisSlot";
+import { getStationPredictAnalysisBase } from "./analysisSlot";
 import { getReplacementCost, getUpgradedStation } from "./station";
 import { calcDissatisfactionGain } from "./mercCompensation";
 import { computeDispatchCommandCost } from "./mission";
@@ -154,28 +154,28 @@ describe("infra upgrade without analysis (T-DD-INFRA)", () => {
     const state = createMockGameState({
       stationState: createMockStationState({
         level: 1,
-        analysisMercLv: 0,
+        predictAnalysisLv: 0,
         analysisMissionLv: 0,
       }),
     });
     const preview = getUpgradedStation(state);
     expect(preview?.level).toBe(2);
-    expect(preview?.analysisMercLv).toBe(0);
+    expect(preview?.predictAnalysisLv).toBe(0);
     expect(preview?.analysisMissionLv).toBe(0);
   });
 });
 
 describe("facility effect wiring (T-DD-WIRE)", () => {
-  it("T-DD-WIRE-ANALYSIS-1: 업무 T1 → getStationMercAnalysisBase = 1", () => {
+  it("T-DD-WIRE-ANALYSIS-1: 업무 T1 → getStationPredictAnalysisBase = 1", () => {
     const state = createMockGameState({
       stationState: createMockStationState({
         category: "업무",
         facilityId: "work_signal_relay",
         facilityTier: 1,
-        analysisMercLv: 0,
+        predictAnalysisLv: 0,
       }),
     });
-    expect(getStationMercAnalysisBase(state)).toBe(1);
+    expect(getStationPredictAnalysisBase(state)).toBe(1);
   });
 
   it("T-DD-WIRE-ANALYSIS-2: rawBase 1 + 업무 T1 bonus → cap 2", () => {
@@ -184,10 +184,10 @@ describe("facility effect wiring (T-DD-WIRE)", () => {
         category: "업무",
         facilityId: "work_signal_relay",
         facilityTier: 2,
-        analysisMercLv: 1,
+        predictAnalysisLv: 1,
       }),
     });
-    expect(getStationMercAnalysisBase(state)).toBe(2);
+    expect(getStationPredictAnalysisBase(state)).toBe(2);
   });
 
   it("T-DD-WIRE-DISPATCH-1: 식사 T1 discount로 OP 비용 -1 (최소 1)", () => {
@@ -250,10 +250,10 @@ describe("D-E cross (T-DD-XDE)", () => {
         category: "업무",
         facilityId: "work_signal_relay",
         facilityTier: 2,
-        analysisMercLv: 0,
+        predictAnalysisLv: 0,
       }),
     });
-    expect(getStationMercAnalysisBase(state)).toBe(2);
+    expect(getStationPredictAnalysisBase(state)).toBe(2);
   });
 });
 

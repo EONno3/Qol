@@ -239,7 +239,7 @@ export interface StationState {
   level: number;
   operatingCostPerTurn: number;
   analysisMissionLv: number;
-  analysisMercLv: number;
+  predictAnalysisLv: number;
 }
 
 export interface PlayerBehavioralStats {
@@ -373,7 +373,7 @@ export interface AnalysisSlotEntry {
 }
 
 export interface AnalysisSlotsState {
-  merc: AnalysisSlotEntry;
+  /** 미션 분석 슬롯 1칸 (용병 슬롯은 Option B에서 폐지) */
   mission: AnalysisSlotEntry;
 }
 
@@ -388,7 +388,7 @@ export interface GameState {
   mercStatuses: Record<string, string[]>;
   /** 용병별 불만도 스택 (D-F). E-9 만족도 이벤트 토대 */
   mercDissatisfactionStacks: Record<string, number>;
-  /** 액티브 분석 슬롯 — 용병·미션 기관 각 1칸 (D-E) */
+  /** 액티브 분석 슬롯 — 미션 기관 1칸 (Option B: 용병 슬롯 폐지) */
   analysisSlots: AnalysisSlotsState;
   /** 게시판 미션별 방치 잔여 턴 (missionId → turns). D-E Decay 정지 연동 */
   missionDecayTimers: Record<string, number>;

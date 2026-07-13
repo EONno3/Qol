@@ -23,7 +23,7 @@ describe("Station Logic", () => {
       locationArea: "Test Area",
       level: 1,
       operatingCostPerTurn: 500,
-      analysisMercLv: 0,
+      predictAnalysisLv: 0,
       analysisMissionLv: 0
     };
 
@@ -49,7 +49,7 @@ describe("Station Logic", () => {
       locationArea: "Test Area",
       level: 1,
       operatingCostPerTurn: 500,
-      analysisMercLv: 0,
+      predictAnalysisLv: 0,
       analysisMissionLv: 0
     };
 
@@ -57,7 +57,7 @@ describe("Station Logic", () => {
     expect(next.ledger).toBe(5000); // (cost + 5000) - cost
     expect(next.stationState?.level).toBe(2);
     expect(next.stationState?.operatingCostPerTurn).toBe(Math.pow(2, 2) * GAME_CONFIG.station.operatingCostBaseMultiplier);
-    expect(next.stationState?.analysisMercLv).toBe(0);
+    expect(next.stationState?.predictAnalysisLv).toBe(0);
     expect(next.maxCommandPoints).toBe(6);
     expect(next.currentCommandPoints).toBe(6);
   });

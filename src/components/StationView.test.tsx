@@ -2,14 +2,12 @@ import { render, screen, fireEvent } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 import { StationView } from "./StationView";
 import { createMockGameState, createMockStationState } from "../test/factories";
-import { createEmptyAnalysisSlots } from "../domain/analysisSlot";
 import { getUpgradeCost } from "../domain/station";
 
 // StationView는 seed.ts의 mercenaries를 내부에서 불러와 고용 목록을 렌더링한다.
 // hiredMercs를 비워 seed 용병이 노출되지 않는 독립 환경에서 UI 분기를 검증한다.
 
 const noopSlotHandlers = {
-  onAssignMercSlot: vi.fn(),
   onAssignMissionSlot: vi.fn(),
   onUpgradeFacility: vi.fn(),
 };
@@ -97,9 +95,9 @@ describe("StationView 컴포넌트 단위 테스트", () => {
     expect(screen.getByRole("button", { name: "업그레이드 진행" })).toBeDisabled();
   });
 
-  it("case 5: 용병 고용소 탭에서 소속 용병이 없으면 안내 문구가 노출된다", () => {
+  it("case 5: roster 탭에서 소속 용병이 없으면 안내 문구가 노출된다", () => {
     renderStation();
-    fireEvent.click(screen.getByText("용병 고용소"));
+    fireEvent.click(screen.getByTestId("station-tab-roster"));
     expect(screen.getByText("고용된 용병이 없습니다.")).toBeInTheDocument();
   });
 
@@ -110,18 +108,19 @@ describe("StationView 컴포넌트 단위 테스트", () => {
   });
 
   describe("분석 기관 탭 (T-DE-UI)", () => {
-    it("T-DE-UI-1: 분석 기관 탭에서 용병·미션 슬롯 select가 렌더링된다", () => {
+    it("T-DE-UI-1: 분석 기관 탭에서 미션 슬롯 select와 매칭 예측 준비 중 카드가 렌더링된다", () => {
       renderStation();
       fireEvent.click(screen.getByText("분석 기관"));
-      expect(screen.getByLabelText("용병 분석 슬롯")).toBeInTheDocument();
       expect(screen.getByLabelText("미션 분석 슬롯")).toBeInTheDocument();
+      expect(screen.getByText(/준비 중/)).toBeInTheDocument();
+      expect(screen.queryByLabelText("용병 분석 슬롯")).not.toBeInTheDocument();
     });
 
-    it("T-DE-UI-2: 용병 슬롯 선택 시 onAssignMercSlot 콜백 호출", () => {
-      const onAssignMercSlot = vi.fn();
+    it("T-DE-UI-2: 미션 슬롯 선택 시 onAssignMissionSlot 콜백 호출", () => {
+      const onAssignMissionSlot = vi.fn();
       const state = createMockGameState({
-        hiredMercs: ["merc_breaker_01"],
-        stationState: createMockStationState({ analysisMercLv: 0 }),
+        availableMissions: ["mock_mission_01"],
+        stationState: createMockStationState({ predictAnalysisLv: 0 }),
       });
       render(
         <StationView
@@ -130,23 +129,26 @@ describe("StationView 컴포넌트 단위 테스트", () => {
           onHire={vi.fn()}
           onFire={vi.fn()}
           onReplaceGear={vi.fn()}
-          onAssignMercSlot={onAssignMercSlot}
-          onAssignMissionSlot={vi.fn()}
+          onAssignMissionSlot={onAssignMissionSlot}
           onUpgradeFacility={vi.fn()}
         />
       );
       fireEvent.click(screen.getByText("분석 기관"));
-      fireEvent.change(screen.getByLabelText("용병 분석 슬롯"), {
-        target: { value: "merc_breaker_01" },
+      fireEvent.change(screen.getByLabelText("미션 분석 슬롯"), {
+        target: { value: "mock_mission_01" },
       });
-      expect(onAssignMercSlot).toHaveBeenCalledWith("merc_breaker_01");
+      expect(onAssignMissionSlot).toHaveBeenCalledWith("mock_mission_01");
     });
 
-    it("T-DD-UI-BIND-1: 업무 시설 버프가 반영된 기관 베이스 레벨을 표시한다", () => {
+    it("T-DD-UI-BIND-1: 업무 시설 버프가 반영된 미션·매칭 예측 베이스 레벨을 표시한다", () => {
       renderStation();
       fireEvent.click(screen.getByText("분석 기관"));
       expect(screen.getAllByText(/기관 베이스 Lv\.1/)).toHaveLength(2);
       expect(screen.queryByText(/기관 베이스 Lv\.0/)).not.toBeInTheDocument();
+
+      fireEvent.click(screen.getByText("인프라 관리"));
+      expect(screen.getByText(/분석 베이스 \(미션 \/ 매칭 예측\)/)).toBeInTheDocument();
+      expect(screen.getByText(/Lv\.1 \/ Lv\.1/)).toBeInTheDocument();
     });
 
     it("T-DE-UI-3: 슬롯 배치 중 progress·effective 표시", () => {
@@ -154,14 +156,13 @@ describe("StationView 컴포넌트 단위 테스트", () => {
         stationState: createMockStationState({
           category: "숙박",
           facilityId: "lodging_patch_den",
-          analysisMercLv: 0,
+          predictAnalysisLv: 0,
           analysisMissionLv: 0,
         }),
         analysisSlots: {
-          merc: { targetId: "merc_breaker_01", progress: 1 },
-          mission: createEmptyAnalysisSlots().mission,
+          mission: { targetId: "mock_mission_01", progress: 1 },
         },
-        hiredMercs: ["merc_breaker_01"],
+        availableMissions: ["mock_mission_01"],
       });
       render(
         <StationView

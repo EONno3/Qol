@@ -23,8 +23,7 @@ import { SlideToDeploy } from "./SlideToDeploy";
 interface Props {
   mission: Mission;
   mercenaries: Mercenary[];
-  mercAnalysisLevel: number;
-  missionAnalysisLevel: number;
+  predictAnalysisLevel: number;
   selectedMercId: string | null;
   currentCommandPoints: number;
   busyMercIds: string[];
@@ -81,8 +80,7 @@ function formatUnmetRequirement(req: MissionConditionTarget): string {
 export function MercMatching({
   mission,
   mercenaries,
-  mercAnalysisLevel,
-  missionAnalysisLevel,
+  predictAnalysisLevel,
   selectedMercId,
   currentCommandPoints,
   busyMercIds,
@@ -91,7 +89,7 @@ export function MercMatching({
   onDeploy,
   onBack,
 }: Props) {
-  const analysisLevel = Math.min(mercAnalysisLevel, missionAnalysisLevel);
+  const analysisLevel = predictAnalysisLevel;
   const slotMerc = selectedMercId
     ? mercenaries.find((m) => m.mercId === selectedMercId) ?? null
     : null;
@@ -116,13 +114,12 @@ export function MercMatching({
   const insufficientCommandPoints = slotMerc
     ? currentCommandPoints < effectiveCommandCost
     : false;
-  // 캐치업 모드인데 개입 노드가 하나도 없으면(L>=2에서 미선택) 출격 차단
   const catchUpNeedsNodes = catchUpModeActive && catchUpNodeNames.length === 0;
 
   function toggleNodePick(name: string) {
     setPickedNodes((prev) => {
       if (prev.includes(name)) return prev.filter((n) => n !== name);
-      if (prev.length >= interventionCap) return prev; // 상한 초과 무시
+      if (prev.length >= interventionCap) return prev;
       return [...prev, name];
     });
   }
@@ -135,7 +132,6 @@ export function MercMatching({
       ? calculateGearDestructionProb(mission, slotMerc, loadout)
       : null;
 
-  // B-2/B-3: MatchCase 유무와 무관하게 항상 평가한다(엔진 로직 결과를 플레이어에게 직접 노출).
   const entryGateEval = slotMerc
     ? evaluateEntryGate(mission.entryGate, slotMerc, loadout)
     : null;
@@ -146,7 +142,6 @@ export function MercMatching({
     ? evaluateVisibilityExposure(mission, slotMerc, loadout)
     : null;
 
-  // B-4: 예상 생존율 변동 분해. 노출 깊이는 유효 레벨 L=min(용병,미션)로 차등한다.
   const survival = slotMerc ? getSurvivalBreakdown(mission.tier, slotMerc) : null;
 
   return (
@@ -346,9 +341,7 @@ export function MercMatching({
         </div>
       )}
 
-      {slotMerc && (
-        <MercResumeFolder merc={slotMerc} mercAnalysisLevel={mercAnalysisLevel} />
-      )}
+      {slotMerc && <MercResumeFolder merc={slotMerc} />}
 
       <div className="matching-bottom">
         <div className="merc-roster-label">용병 목록</div>

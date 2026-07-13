@@ -201,27 +201,39 @@ export function createDefaultStation(
     level: 1,
     operatingCostPerTurn: 1000,
     analysisMissionLv: 0,
-    analysisMercLv: 0,
+    predictAnalysisLv: 0,
   };
 }
 
-/** 구세이브: facilityId/facilityTier 누락 시 업무 기본 시설로 보강 (기존 analysis 레벨 유지) */
-export function migrateLegacyStationState(station: StationState): StationState {
-  if (station.facilityId && station.facilityTier) {
-    return station;
+/** 구세이브: facility 보강 + analysisMercLv → predictAnalysisLv 마이그레이션 */
+export function migrateLegacyStationState(
+  station: StationState & { analysisMercLv?: number },
+): StationState {
+  const legacyMercLv = (station as { analysisMercLv?: number }).analysisMercLv;
+  const base: StationState = {
+    ...station,
+    predictAnalysisLv:
+      typeof station.predictAnalysisLv === "number"
+        ? station.predictAnalysisLv
+        : typeof legacyMercLv === "number"
+          ? legacyMercLv
+          : 0,
+  };
+  delete (base as StationState & { analysisMercLv?: number }).analysisMercLv;
+
+  if (base.facilityId && base.facilityTier) {
+    return base;
   }
-  const category = station.category ?? "업무";
+  const category = base.category ?? "업무";
   const facilityId = DEFAULT_FACILITY_BY_CATEGORY[category];
   const facilityDef = FACILITY_DEFINITIONS[facilityId];
   return {
-    ...station,
+    ...base,
     category,
     facilityId,
-    facilityTier: station.facilityTier ?? 1,
+    facilityTier: base.facilityTier ?? 1,
     facilityName:
-      station.facilityName === "낡은 임대 아지트"
-        ? facilityDef.nameKo
-        : station.facilityName,
+      base.facilityName === "낡은 임대 아지트" ? facilityDef.nameKo : base.facilityName,
   };
 }
 

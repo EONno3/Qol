@@ -2,15 +2,14 @@ import type { Mercenary } from "../data/types";
 
 export interface MercResumeFolderProps {
   merc: Mercenary;
-  mercAnalysisLevel: number;
 }
 
-/** 용병 분석 기관 레벨에 따라 Phase 0~2 이력서를 표시하는 공용 폴더 UI. */
-export function MercResumeFolder({ merc, mercAnalysisLevel }: MercResumeFolderProps) {
+/** 용병 이력서 Phase 0~2 전체 상시 공개 (Option B: 분석 게이트 폐지). */
+export function MercResumeFolder({ merc }: MercResumeFolderProps) {
   return (
     <div className="folder" style={{ marginTop: "12px", background: "var(--panel-2)" }}>
       <div className="folder-tab" style={{ background: "var(--cyan)", color: "#042024" }}>
-        용병 이력서 판독기 ({merc.aliasKo})
+        용병 이력서 ({merc.aliasKo})
       </div>
       <div
         className="folder-paper"
@@ -25,7 +24,7 @@ export function MercResumeFolder({ merc, mercAnalysisLevel }: MercResumeFolderPr
           </p>
         </div>
 
-        {mercAnalysisLevel >= 1 && merc.phase1SummaryKo && (
+        {merc.phase1SummaryKo && (
           <div
             className="folder-page-section"
             style={{ borderTop: "1px dashed #cfc7b6", paddingTop: "10px" }}
@@ -39,7 +38,7 @@ export function MercResumeFolder({ merc, mercAnalysisLevel }: MercResumeFolderPr
           </div>
         )}
 
-        {mercAnalysisLevel >= 2 && merc.phase2SummaryKo && (
+        {merc.phase2SummaryKo && (
           <div
             className="folder-page-section"
             style={{ borderTop: "1px dashed #cfc7b6", paddingTop: "10px" }}

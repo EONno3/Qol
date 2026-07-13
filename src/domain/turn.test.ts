@@ -30,7 +30,7 @@ describe("advanceTurn", () => {
       locationArea: "Pipe",
       level: 2,
       operatingCostPerTurn: 1000,
-      analysisMercLv: 1,
+      predictAnalysisLv: 1,
       analysisMissionLv: 1,
     };
 
