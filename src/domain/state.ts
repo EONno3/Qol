@@ -300,6 +300,7 @@ export function createInitialState(): GameState {
     followupHooks: [],
     settledReports: [],
     generatedReports: {},
+    activeCatchUpRun: null,
     // World State Phase D
     fixerProfile: null,
     stationState: null,

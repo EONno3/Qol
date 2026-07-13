@@ -179,6 +179,7 @@ export function createMockGameState(overrides: Partial<GameState> = {}): GameSta
     followupHooks: [],
     settledReports: [],
     generatedReports: {},
+    activeCatchUpRun: null,
     fixerProfile: null,
     stationState: null,
     playerBehavioralStats: createMockPlayerStats(),

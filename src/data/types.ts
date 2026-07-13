@@ -401,6 +401,8 @@ export interface GameState {
   followupHooks: string[];
   settledReports: string[];
   generatedReports: Record<string, ResultReport>;
+  /** D-C-2: 인런 캐치업 전용 상태 머신 (동시 1개). 어사인과 병렬 트랙 */
+  activeCatchUpRun: CatchUpRunState | null;
 
   // World State Phase D 필드
   /** 게임 시작 시 캐릭터 생성으로 세팅된다. 생성 전에는 null. */
@@ -505,10 +507,38 @@ export interface FollowupHook {
   hookSummaryKo: string;
 }
 
-/** 캐치업(현장 개입) 설정 — 실행기 옵트인 파라미터 */
+/** 캐치업(현장 개입) 설정 — 레거시 배치 경로 옵트인 파라미터 (D-C-2 이후 어사인 경로 미사용) */
 export interface CatchUpConfig {
-  /** 픽서가 직접 개입할 노드들의 표시 이름(nameKo) 목록 */
+  /** 픽서가 직접 개입할 노드들의 표시 이름(nameKo) 목록 — 레거시 배치 전용 */
   interventionNodeNamesKo: string[];
+}
+
+/** D-C-2: 인런 캐치업 전용 상태 머신 스냅샷 */
+export interface CatchUpRunState {
+  dispatchId: string;
+  missionId: string;
+  mercId: string;
+  status: "active" | "finished";
+  predictAnalysisLevel: number;
+  interventionsLeft: number;
+  intervenedCount: number;
+  rngSeed: number;
+  fatigueMultiplier: number;
+  queueNodes: QueuedNode[];
+  phase: "main" | "survival" | "done";
+  entryBlocked: boolean;
+  logs: string[];
+  nodeResolutions: NodeResolutionLog[];
+  context: MissionRunContext;
+  totalFatigue: number;
+  minorFails: number;
+  objectiveSucceeded: boolean;
+  exitOutcome: NodeOutcome | null;
+  catastropheRole: NodeRole | null;
+  nodeIndex: number;
+  catchUpBonusEarned: boolean;
+  stars: number;
+  fatiguePerNode: number;
 }
 
 /** AI 작전 일지 서사 모드 — 어사인=용병 1인칭 / 캐치업=픽서(관제소) 1인칭 */
