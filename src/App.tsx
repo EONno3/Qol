@@ -1,8 +1,15 @@
 import { useEffect, useMemo, useState } from "react";
 import { getMercenary, getMission } from "./data/lookups";
 import { mercenaries as allMercs, allMissions, gearDefs, implantDefs } from "./data/seed";
-import type { CatchUpConfig, ResultReport as Report } from "./data/types";
+import type { ResultReport as Report } from "./data/types";
 import { acceptMission, checkCompletedDispatches, startDispatch } from "./domain/mission";
+import { completeCatchUpDispatch, startCatchUpDispatch } from "./domain/catchUpDispatch";
+import {
+  advanceCatchUpNode,
+  finalizeCatchUpRun,
+  peekCatchUpNode,
+  type CatchUpNodeAction,
+} from "./domain/catchUpRun";
 import { applySettlement, resolveReport } from "./domain/settlement";
 import { createInitialState, type GameState } from "./domain/state";
 import { weightMissions } from "./domain/world";
@@ -28,6 +35,8 @@ import { AcceptedMissions } from "./components/AcceptedMissions";
 import { CharacterCreation } from "./components/CharacterCreation";
 import { DeskView } from "./components/DeskView";
 import { MercMatching } from "./components/MercMatching";
+import type { DeployMode } from "./components/DroneCatchUpView";
+import { CatchUpRunView } from "./components/CatchUpRunView";
 import { MissionBoard } from "./components/MissionBoard";
 import { MissionDetail } from "./components/MissionDetail";
 import { ResultReport } from "./components/ResultReport";
@@ -47,6 +56,7 @@ type Screen =
   | "accepted"
   | "matching"
   | "desk" // AssignRun 대체
+  | "catchup" // D-C-2 인런 캐치업
   | "station"
   | "mercProfile"
   | "report"
@@ -118,6 +128,9 @@ export function App({ initialState, bypassTitle = false }: { initialState?: Game
         ...loadedState,
         missionDecayTimers: {},
       };
+    }
+    if (loadedState.activeCatchUpRun === undefined) {
+      loadedState = { ...loadedState, activeCatchUpRun: null };
     }
     return loadedState;
   });
@@ -354,10 +367,75 @@ export function App({ initialState, bypassTitle = false }: { initialState?: Game
     setScreen("matching");
   }
 
-  function handleDeploy(mercId: string, catchUp?: CatchUpConfig) {
+  function handleDeploy(mercId: string, mode: DeployMode) {
     if (!selectedMissionId) return;
-    setState(s => startDispatch(s, selectedMissionId, mercId, catchUp ? { catchUp } : undefined));
-    setScreen("desk"); // 출격 후 바로 데스크 관제 화면으로 전환
+
+    const loadout = {
+      gearOwner: state.gearOwner,
+      implantOwner: state.implantOwner,
+      gearDefs,
+      implantDefs,
+    };
+
+    if (mode === "catchUp") {
+      const predictLevel = getEffectiveAnalysisLevels(
+        state,
+        mercId,
+        selectedMissionId,
+      ).predict;
+      let nextState = startCatchUpDispatch(state, selectedMissionId, mercId, predictLevel);
+      const run = nextState.activeCatchUpRun;
+      setSelectedMercId(mercId);
+
+      if (run?.status === "finished") {
+        const mission = getMission(run.missionId);
+        const merc = getMercenary(run.mercId);
+        if (mission && merc) {
+          const { report } = finalizeCatchUpRun(run, mission, merc, loadout);
+          nextState = completeCatchUpDispatch(nextState, report);
+          setState(nextState);
+          setReport(report);
+          setSelectedMissionId(run.missionId);
+          setScreen("report");
+          return;
+        }
+      }
+
+      setState(nextState);
+      setScreen("catchup");
+      return;
+    }
+
+    setState((s) => startDispatch(s, selectedMissionId, mercId));
+    setScreen("desk");
+  }
+
+  function handleCatchUpNodeAction(action: CatchUpNodeAction) {
+    const run = state.activeCatchUpRun;
+    if (!run) return;
+    const mission = getMission(run.missionId);
+    const merc = getMercenary(run.mercId);
+    if (!mission || !merc) return;
+
+    const loadout = {
+      gearOwner: state.gearOwner,
+      implantOwner: state.implantOwner,
+      gearDefs,
+      implantDefs,
+    };
+
+    const nextRun = advanceCatchUpNode(run, mission, merc, action, loadout);
+
+    if (nextRun.status === "finished") {
+      const { report } = finalizeCatchUpRun(nextRun, mission, merc, loadout);
+      setState((s) => completeCatchUpDispatch({ ...s, activeCatchUpRun: nextRun }, report));
+      setReport(report);
+      setSelectedMissionId(run.missionId);
+      setSelectedMercId(run.mercId);
+      setScreen("report");
+    } else {
+      setState((s) => ({ ...s, activeCatchUpRun: nextRun }));
+    }
   }
 
   function handleTimeSkip() {
@@ -586,7 +664,11 @@ export function App({ initialState, bypassTitle = false }: { initialState?: Game
             }
             selectedMercId={selectedMercId}
             currentCommandPoints={state.currentCommandPoints}
-            busyMercIds={[...state.activeDispatches, ...state.completedDispatches].map(d => d.mercId)}
+            busyMercIds={[
+              ...state.activeDispatches,
+              ...state.completedDispatches,
+              ...(state.activeCatchUpRun ? [{ mercId: state.activeCatchUpRun.mercId }] : []),
+            ].map((d) => d.mercId)}
             loadout={{
               gearOwner: state.gearOwner,
               implantOwner: state.implantOwner,
@@ -596,6 +678,14 @@ export function App({ initialState, bypassTitle = false }: { initialState?: Game
             onSelectMerc={setSelectedMercId}
             onDeploy={handleDeploy}
             onBack={() => setScreen("accepted")}
+          />
+        )}
+
+        {screen === "catchup" && state.activeCatchUpRun && (
+          <CatchUpRunView
+            run={state.activeCatchUpRun}
+            currentNode={peekCatchUpNode(state.activeCatchUpRun)}
+            onAction={handleCatchUpNodeAction}
           />
         )}
 
@@ -653,7 +743,11 @@ export function App({ initialState, bypassTitle = false }: { initialState?: Game
         state={state} 
         onTimeSkip={handleTimeSkip} 
         onNextTurn={handleAdvanceTurn} 
-        canAdvanceTurn={state.activeDispatches.length === 0 && state.completedDispatches.length === 0}
+        canAdvanceTurn={
+          state.activeDispatches.length === 0 &&
+          state.completedDispatches.length === 0 &&
+          !state.activeCatchUpRun
+        }
         onToggleAiNarrator={(enabled) =>
           setState((s) =>
             enabled

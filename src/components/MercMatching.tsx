@@ -1,5 +1,5 @@
 import { useState } from "react";
-import type { CatchUpConfig, Mercenary, Mission, MissionConditionTarget, StatKey } from "../data/types";
+import type { Mercenary, Mission, MissionConditionTarget, StatKey } from "../data/types";
 import type { DispatchLoadoutContext } from "../domain/gearStatBonus";
 import { getEffectiveStatForNode } from "../domain/gearStatBonus";
 import { canDeploy, visibleMatchInfo } from "../domain/matching";
@@ -8,14 +8,9 @@ import { calculateGearDestructionProb } from "../domain/engine";
 import { evaluateEntryGate } from "../domain/entryGate";
 import { evaluateVisibilityExposure } from "../domain/visibilityPenalty";
 import { getSurvivalBreakdown } from "../domain/survival";
-import {
-  catchUpSelectableNodeNames,
-  maxCatchUpInterventions,
-  selectCatchUpNodes,
-} from "../domain/catchUp";
 import { GAME_CONFIG } from "../data/config";
 import { visibilityName } from "../data/lookups";
-import { DroneCatchUpView } from "./DroneCatchUpView";
+import { DroneCatchUpView, type DeployMode } from "./DroneCatchUpView";
 import { MercResumeFolder } from "./MercResumeFolder";
 import { outlookLabel, verdictClass, verdictLabel } from "./labels";
 import { SlideToDeploy } from "./SlideToDeploy";
@@ -29,7 +24,7 @@ interface Props {
   busyMercIds: string[];
   loadout?: DispatchLoadoutContext;
   onSelectMerc: (mercId: string) => void;
-  onDeploy: (mercId: string, catchUp?: CatchUpConfig) => void;
+  onDeploy: (mercId: string, mode: DeployMode) => void;
   onBack: () => void;
 }
 
@@ -95,18 +90,7 @@ export function MercMatching({
     : null;
 
   const [catchUpOn, setCatchUpOn] = useState(false);
-  const [pickedNodes, setPickedNodes] = useState<string[]>([]);
-  const canPickNodes = analysisLevel >= 2;
-  const selectableNodeNames = catchUpSelectableNodeNames(mission);
-  const interventionCap = maxCatchUpInterventions(selectableNodeNames.length);
   const catchUpModeActive = catchUpOn && !!slotMerc;
-  const catchUpNodeNames = catchUpModeActive
-    ? selectCatchUpNodes({ mission, analysisLevel, picked: pickedNodes })
-    : [];
-  const catchUpConfig: CatchUpConfig | undefined =
-    catchUpModeActive && catchUpNodeNames.length > 0
-      ? { interventionNodeNamesKo: catchUpNodeNames }
-      : undefined;
   const baseCommandCost = slotMerc?.commandCost ?? 0;
   const effectiveCommandCost = catchUpModeActive
     ? Math.ceil(baseCommandCost * GAME_CONFIG.catchUp.costMultiplier)
@@ -114,15 +98,7 @@ export function MercMatching({
   const insufficientCommandPoints = slotMerc
     ? currentCommandPoints < effectiveCommandCost
     : false;
-  const catchUpNeedsNodes = catchUpModeActive && catchUpNodeNames.length === 0;
 
-  function toggleNodePick(name: string) {
-    setPickedNodes((prev) => {
-      if (prev.includes(name)) return prev.filter((n) => n !== name);
-      if (prev.length >= interventionCap) return prev;
-      return [...prev, name];
-    });
-  }
   const match = selectedMercId ? getMatch(mission.missionId, selectedMercId, loadout) : undefined;
   const info = match ? visibleMatchInfo(match, analysisLevel) : null;
   const deployable = match ? canDeploy(match) : false;
@@ -384,24 +360,15 @@ export function MercMatching({
           onCatchUpChange={setCatchUpOn}
           baseCommandCost={baseCommandCost}
           effectiveCommandCost={effectiveCommandCost}
-          canPickNodes={canPickNodes}
-          selectableNodeNames={selectableNodeNames}
-          pickedNodes={pickedNodes}
-          onToggleNodePick={toggleNodePick}
-          interventionCap={interventionCap}
-          catchUpNeedsNodes={catchUpNeedsNodes}
+          lowHudResolution={analysisLevel < 2}
         />
 
         <SlideToDeploy
-          disabled={
-            entryBlocked ||
-            !match ||
-            !deployable ||
-            insufficientCommandPoints ||
-            catchUpNeedsNodes
+          disabled={entryBlocked || !match || !deployable || insufficientCommandPoints}
+          label={catchUpModeActive ? "밀어서 출격 (현장 개입) ▶" : "밀어서 출격 (관제소 위임) ▶"}
+          onDeploy={() =>
+            selectedMercId && onDeploy(selectedMercId, catchUpModeActive ? "catchUp" : "assign")
           }
-          label={catchUpConfig ? "밀어서 출격 (현장 개입) ▶" : "밀어서 출격 (관제소 위임) ▶"}
-          onDeploy={() => selectedMercId && onDeploy(selectedMercId, catchUpConfig)}
         />
       </div>
     </section>

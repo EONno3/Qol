@@ -1,17 +1,15 @@
 import { GAME_CONFIG } from "../data/config";
 
+export type DeployMode = "assign" | "catchUp";
+
 export interface DroneCatchUpViewProps {
   visible: boolean;
   catchUpOn: boolean;
   onCatchUpChange: (on: boolean) => void;
   baseCommandCost: number;
   effectiveCommandCost: number;
-  canPickNodes: boolean;
-  selectableNodeNames: string[];
-  pickedNodes: string[];
-  onToggleNodePick: (name: string) => void;
-  interventionCap: number;
-  catchUpNeedsNodes: boolean;
+  /** predict Lv<2 — 인런 HUD 저해상도 예고 */
+  lowHudResolution: boolean;
 }
 
 export function DroneCatchUpView({
@@ -20,16 +18,9 @@ export function DroneCatchUpView({
   onCatchUpChange,
   baseCommandCost,
   effectiveCommandCost,
-  canPickNodes,
-  selectableNodeNames,
-  pickedNodes,
-  onToggleNodePick,
-  interventionCap,
-  catchUpNeedsNodes,
+  lowHudResolution,
 }: DroneCatchUpViewProps) {
   if (!visible) return null;
-
-  const interventionPercent = Math.round(GAME_CONFIG.catchUp.interventionRatio * 100);
 
   return (
     <div
@@ -62,56 +53,25 @@ export function DroneCatchUpView({
 
           <div className="drone-catchup-hud">
             <span className="drone-catchup-hud__label">OP 소모</span>
-            <span className="drone-catchup-hud__value">
-              {effectiveCommandCost} OP
-            </span>
+            <span className="drone-catchup-hud__value">{effectiveCommandCost} OP</span>
             <span className="drone-catchup-hud__meta">
-              (기본 {baseCommandCost} ×1.5, 올림)
+              (기본 {baseCommandCost} ×{GAME_CONFIG.catchUp.costMultiplier}, 올림)
             </span>
           </div>
 
-          {canPickNodes ? (
-            <div className="drone-catchup-nodes">
-              <p className="drone-catchup-nodes__hint">
-                개입할 노드 선택 (최대 {interventionCap}개 — 부정 확률 +
-                {GAME_CONFIG.catchUp.nodePenaltyPercent}%p, 성공 시 추가 보상)
-              </p>
-              <div className="drone-catchup-nodes__list">
-                {selectableNodeNames.map((name) => (
-                  <label key={name} className="drone-catchup-node">
-                    <input
-                      type="checkbox"
-                      checked={pickedNodes.includes(name)}
-                      onChange={() => onToggleNodePick(name)}
-                      disabled={
-                        !pickedNodes.includes(name) && pickedNodes.length >= interventionCap
-                      }
-                    />
-                    <span>{name}</span>
-                  </label>
-                ))}
-              </div>
-              {catchUpNeedsNodes && (
-                <p className="drone-catchup-nodes__error">
-                  개입할 노드를 최소 1개 선택하세요.
-                </p>
-              )}
-            </div>
-          ) : (
-            <div
-              className="drone-glitch"
-              data-testid="drone-l0-glitch"
-              role="alert"
-            >
+          <p className="drone-catchup-nodes__hint">
+            출격 후 드론 관제 화면에서 노드마다 [개입] / [패스]를 선택합니다. 개입 상한: 미션 노드의{" "}
+            {Math.round(GAME_CONFIG.catchUp.interventionRatio * 100)}% (올림).
+          </p>
+
+          {lowHudResolution && (
+            <div className="drone-glitch" data-testid="drone-l0-glitch" role="alert">
               <div className="drone-glitch__scanline" aria-hidden="true" />
               <div className="drone-glitch__label">SIGNAL DEGRADED</div>
               <p className="drone-glitch__body">
-                드론 피드 해상도 불충분 — 개입 구간을 식별할 수 없음.
-                <strong> 무작위 {interventionPercent}% 구간</strong>에 강제 개입됩니다.
+                매칭 예측 Lv.2 미만 — 인런 드론 HUD 해상도가 제한됩니다. 개입은 가능합니다.
               </p>
-              <p className="drone-glitch__hint">
-                심층 분석 Lv.2 이상에서 노드 직접 지정 가능
-              </p>
+              <p className="drone-glitch__hint">심층 분석 Lv.2 이상에서 노드 상세 HUD 해금</p>
             </div>
           )}
         </div>

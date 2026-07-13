@@ -258,7 +258,7 @@ describe("MercMatching B-4 생존율 노출 UI (T-B4-UI)", () => {
   });
 });
 
-describe("MercMatching 캐치업 현장 개입 UI (T-DC-UI-CU)", () => {
+describe("MercMatching catch-up deploy UI (T-DC-UI-CU / T-DC2-UI-1)", () => {
   const catchMerc = createMockMercenary({ mercId: "catch_merc", aliasKo: "개입러", commandCost: 3 });
 
   function renderCatchUp(level: number, overrides = {}) {
@@ -272,31 +272,29 @@ describe("MercMatching 캐치업 현장 개입 UI (T-DC-UI-CU)", () => {
     });
   }
 
-  it("T-DC-UI-CU-1: 용병이 선택되면 활성화된 캐치업 토글이 노출된다(준비중 더미 아님)", () => {
+  it("T-DC-UI-CU-1: 용병 선택 시 캐치업 토글이 노출된다", () => {
     renderCatchUp(2);
     expect(screen.getByRole("checkbox", { name: /캐치업/ })).toBeEnabled();
-    expect(screen.queryByText(/준비 중/)).not.toBeInTheDocument();
   });
 
-  it("T-DC-UI-CU-2: 토글 ON 시 지휘력 코스트가 ×1.5(올림)로 표시된다", () => {
+  it("T-DC-UI-CU-2: 토글 ON 시 OP x1.5 표시", () => {
     renderCatchUp(2);
     fireEvent.click(screen.getByRole("checkbox", { name: /캐치업/ }));
-    // 기본 코스트 3 → ceil(3*1.5)=5
     expect(screen.getByText(/×1\.5/)).toBeInTheDocument();
     expect(screen.getByText(/5 OP/)).toBeInTheDocument();
   });
 
-  it("T-DC-UI-CU-3: L>=2에서 토글 ON 시 노드 직접 선택 UI가 노출된다", () => {
+  it("T-DC2-UI-1: 출격 전 노드 예약 픽커 없음 — 인런 관제 안내만", () => {
     renderCatchUp(2);
     fireEvent.click(screen.getByRole("checkbox", { name: /캐치업/ }));
-    expect(screen.getByText(/개입할 노드 선택/)).toBeInTheDocument();
-    expect(screen.getByText("작전 구역 진입")).toBeInTheDocument();
+    expect(screen.getByText(/출격 후 드론 관제/)).toBeInTheDocument();
+    expect(screen.queryByText(/개입할 노드 선택/)).not.toBeInTheDocument();
   });
 
-  it("T-DC-UI-CU-4: L<2에서 토글 ON 시 노드 지정 불가·무작위 개입 안내가 노출된다(정보 분리)", () => {
+  it("T-DC-UI-CU-4: L<2 Glitch는 인런 HUD 예고만", () => {
     renderCatchUp(1);
     fireEvent.click(screen.getByRole("checkbox", { name: /캐치업/ }));
-    expect(screen.getByText(/무작위/)).toBeInTheDocument();
+    expect(screen.getByText(/SIGNAL DEGRADED/i)).toBeInTheDocument();
     expect(screen.queryByText(/개입할 노드 선택/)).not.toBeInTheDocument();
   });
 });
