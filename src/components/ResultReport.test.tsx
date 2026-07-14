@@ -76,7 +76,7 @@ describe("ResultReport AI 브리핑 렌더링", () => {
     expect(screen.queryByText("기본 정산 완료 로그")).not.toBeInTheDocument();
   });
 
-  it("case 2: aiNarrativeKo가 'GENERATING'일 때 로딩 안내 문구를 노출한다", () => {
+  it("case 2: aiNarrativeKo가 'GENERATING'일 때 어사인 로딩 게이트를 노출한다 (T-DUX-LOAD-1)", () => {
     const report: Report = {
       ...baseReport,
       aiNarrativeKo: "GENERATING",
@@ -91,10 +91,50 @@ describe("ResultReport AI 브리핑 렌더링", () => {
       />
     );
 
-    // 로딩 문구가 나타나는가?
-    expect(screen.getByText("작전 현장 데이터 스트림 판독 중...")).toBeInTheDocument();
-    // 기본 summaryLogKo는 나타나지 않아야 함
+    expect(screen.getByTestId("report-narrative-loading")).toBeInTheDocument();
+    expect(screen.getByText("데이터 복호화 및 보고서 컴파일 중...")).toBeInTheDocument();
     expect(screen.queryByText("기본 정산 완료 로그")).not.toBeInTheDocument();
+    expect(screen.queryByText("작전 현장 데이터 스트림 판독 중...")).not.toBeInTheDocument();
+  });
+
+  it("T-DUX-LOAD-2: GENERATING + catchUpActive면 관제 로그 동기화 문구를 노출한다", () => {
+    const report: Report = {
+      ...baseReport,
+      catchUpActive: true,
+      aiNarrativeKo: "GENERATING",
+    };
+
+    render(
+      <ResultReport report={report} mission={mockMission} merc={mockMerc} onSettle={vi.fn()} />
+    );
+
+    expect(screen.getByTestId("report-narrative-loading")).toBeInTheDocument();
+    expect(screen.getByText("현장 관제 로그 동기화 중...")).toBeInTheDocument();
+    expect(screen.queryByText("데이터 복호화 및 보고서 컴파일 중...")).not.toBeInTheDocument();
+  });
+
+  it("T-DUX-LOAD-3: FALLBACK이면 로딩 게이트 없이 폴백 일지로 전환된다 (소프트락 방지)", () => {
+    const { rerender } = render(
+      <ResultReport
+        report={{ ...baseReport, aiNarrativeKo: "GENERATING" }}
+        mission={mockMission}
+        merc={mockMerc}
+        onSettle={vi.fn()}
+      />
+    );
+    expect(screen.getByTestId("report-narrative-loading")).toBeInTheDocument();
+
+    rerender(
+      <ResultReport
+        report={{ ...baseReport, aiNarrativeKo: "FALLBACK" }}
+        mission={mockMission}
+        merc={mockMerc}
+        onSettle={vi.fn()}
+      />
+    );
+
+    expect(screen.queryByTestId("report-narrative-loading")).not.toBeInTheDocument();
+    expect(screen.getByText(/깔끔하게 정리했다[\s\S]*— 의적/)).toBeInTheDocument();
   });
 
   it("case 3: aiNarrativeKo가 'FALLBACK'이거나 없을 때 기계식 summaryLogKo 대신 1인칭 일지를 노출한다", () => {

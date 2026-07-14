@@ -5,6 +5,7 @@ import { netCredits } from "../domain/settlement";
 import { calcCompensationSplit } from "../domain/mercCompensation";
 import { buildFallbackNarrative } from "../domain/fallbackNarrative";
 import { resultClass, resultTypeLabel, tierClass } from "./labels";
+import { ReportNarrativeLoading } from "./ReportNarrativeLoading";
 
 interface Props {
   report: Report;
@@ -26,18 +27,16 @@ export function ResultReport({ report, mission, merc, onSettle }: Props) {
     report.gearUpdates.reduce((sum, g) => sum + g.repairCost, 0) +
     report.implantUpdates.reduce((sum, i) => sum + i.repairCost, 0);
 
-  // AI 브리핑 또는 폴백 1인칭 내레이션 결정
-  // - GENERATING: 생성 대기 중 안내
-  // - 실제 AI 텍스트: 그대로 노출
-  // - FALLBACK/미연결: 기계식 summaryLogKo 대신 용병 1인칭 일지로 재구성
-  const displayNarrative =
-    report.aiNarrativeKo === "GENERATING"
-      ? "작전 현장 데이터 스트림 판독 중..."
-      : report.aiNarrativeKo && report.aiNarrativeKo !== "FALLBACK"
-      ? report.aiNarrativeKo
-      : buildFallbackNarrative(report, mission, merc);
-
   const isCatchUp = report.catchUpActive === true;
+  const isGenerating = report.aiNarrativeKo === "GENERATING";
+  // GENERATING → 로딩 게이트 / AI 본문 / FALLBACK·미설정 → 1인칭 폴백 (무한 로딩 방지)
+  const displayNarrative =
+    isGenerating
+      ? null
+      : report.aiNarrativeKo && report.aiNarrativeKo !== "FALLBACK"
+        ? report.aiNarrativeKo
+        : buildFallbackNarrative(report, mission, merc);
+
   const narrativeLabel = isCatchUp
     ? "현장 개입 기록 (관제소 로그)"
     : "현장 보고 (용병 일지)";
@@ -53,20 +52,27 @@ export function ResultReport({ report, mission, merc, onSettle }: Props) {
       <div className={`report-folder ${tierClass(mission.tier)}`}>
         <div className="report-nodelog" style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
           <div className="folder-page-label">{narrativeLabel}</div>
-          
-          <div className="narrative-box" style={{
-            padding: "20px",
-            background: "var(--paper)",
-            color: "var(--paper-ink)",
-            borderLeft: isCatchUp ? "4px solid var(--amber)" : "4px solid var(--cyan)",
-            fontSize: "1.15rem",
-            lineHeight: "1.7",
-            fontStyle: isCatchUp ? "normal" : "italic",
-            borderRadius: "0 4px 4px 0",
-            whiteSpace: "pre-line",
-            minHeight: "80px"
-          }}>
-            {displayNarrative}
+
+          <div
+            className="narrative-box"
+            style={{
+              padding: "20px",
+              background: "var(--paper)",
+              color: "var(--paper-ink)",
+              borderLeft: isCatchUp ? "4px solid var(--amber)" : "4px solid var(--cyan)",
+              fontSize: "1.15rem",
+              lineHeight: "1.7",
+              fontStyle: isCatchUp || isGenerating ? "normal" : "italic",
+              borderRadius: "0 4px 4px 0",
+              whiteSpace: "pre-line",
+              minHeight: "80px",
+            }}
+          >
+            {isGenerating ? (
+              <ReportNarrativeLoading catchUpActive={isCatchUp} />
+            ) : (
+              displayNarrative
+            )}
           </div>
 
           {/* 접이식 상세 텔레메트리 기계식 로그 */}
