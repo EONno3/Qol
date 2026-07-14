@@ -30,7 +30,7 @@ import {
   findPendingNarrateDispatch,
   resetFallbackReportsForNarrateRetry,
 } from "./domain/narrateQueue";
-
+import { isReportNarrativeReady } from "./domain/reportNarrativeStatus";
 import { AcceptedMissions } from "./components/AcceptedMissions";
 import { CharacterCreation } from "./components/CharacterCreation";
 import { DeskView } from "./components/DeskView";
@@ -149,6 +149,17 @@ export function App({ initialState, bypassTitle = false }: { initialState?: Game
   const [profileMercId, setProfileMercId] = useState<string | null>(null);
   const [report, setReport] = useState<Report | null>(null);
   const [turnNotice, setTurnNotice] = useState<string | null>(null);
+  const [reportReadyToast, setReportReadyToast] = useState<string | null>(null);
+
+  function notifyReportReady(missionId: string, catchUpActive?: boolean) {
+    const mission = getMission(missionId);
+    const name = mission?.displayNameKo ?? "작전";
+    setReportReadyToast(
+      catchUpActive
+        ? `관제 로그 동기화 완료 — 「${name}」 관제소에서 열람 가능`
+        : `보고서 컴파일 완료 — 「${name}」 관제소에서 열람 가능`,
+    );
+  }
 
   const hasSave = useMemo(() => {
     try {
@@ -187,29 +198,33 @@ export function App({ initialState, bypassTitle = false }: { initialState?: Game
 
   // 백그라운드 AI 브리핑 미리 생성 처리
   useEffect(() => {
-    if (state.aiNarratorEnabled === false) {
-      // AI 브리핑 비활성화 시 즉시 FALLBACK 처리
+    const applyOfflineFallback = () => {
       const targetDispatch = findPendingNarrateDispatch(state);
-      if (targetDispatch) {
-        setState((s) => {
-          const r = s.generatedReports[targetDispatch.dispatchId];
-          if (!r || r.aiNarrativeKo !== undefined) return s;
-          return {
-            ...s,
-            generatedReports: {
-              ...s.generatedReports,
-              [targetDispatch.dispatchId]: {
-                ...r,
-                aiNarrativeKo: "FALLBACK",
-              },
+      if (!targetDispatch) return;
+      setState((s) => {
+        const r = s.generatedReports[targetDispatch.dispatchId];
+        if (!r || r.aiNarrativeKo !== undefined) return s;
+        return {
+          ...s,
+          generatedReports: {
+            ...s.generatedReports,
+            [targetDispatch.dispatchId]: {
+              ...r,
+              aiNarrativeKo: "FALLBACK",
             },
-          };
-        });
-      }
+          },
+        };
+      });
+      notifyReportReady(
+        targetDispatch.missionId,
+        state.generatedReports[targetDispatch.dispatchId]?.catchUpActive,
+      );
+    };
+
+    if (state.aiNarratorEnabled === false || typeof fetch === "undefined") {
+      applyOfflineFallback();
       return;
     }
-
-    if (typeof fetch === "undefined") return;
 
     const targetDispatch = findPendingNarrateDispatch(state);
     if (!targetDispatch) return;
@@ -272,6 +287,7 @@ export function App({ initialState, bypassTitle = false }: { initialState?: Game
               },
             };
           });
+          notifyReportReady(targetDispatch.missionId, report.catchUpActive);
         } else {
           throw new Error("Empty narrative");
         }
@@ -292,6 +308,7 @@ export function App({ initialState, bypassTitle = false }: { initialState?: Game
             },
           };
         });
+        notifyReportReady(targetDispatch.missionId, report.catchUpActive);
       })
       .finally(() => {
         clearTimeout(timeoutId);
@@ -303,6 +320,13 @@ export function App({ initialState, bypassTitle = false }: { initialState?: Game
       clearTimeout(timeoutId);
     };
   }, [state.activeDispatches, state.completedDispatches, state.generatedReports, state.aiNarratorEnabled]);
+
+  // 보고서 준비 토스트 자동 해제
+  useEffect(() => {
+    if (!reportReadyToast) return;
+    const t = setTimeout(() => setReportReadyToast(null), 8000);
+    return () => clearTimeout(t);
+  }, [reportReadyToast]);
 
   // 상태 변경 시 자동 저장
   useEffect(() => {
@@ -394,9 +418,9 @@ export function App({ initialState, bypassTitle = false }: { initialState?: Game
           const { report } = finalizeCatchUpRun(run, mission, merc, loadout);
           nextState = completeCatchUpDispatch(nextState, report);
           setState(nextState);
-          setReport(report);
           setSelectedMissionId(run.missionId);
-          setScreen("report");
+          setReport(null);
+          setScreen("desk");
           return;
         }
       }
@@ -429,10 +453,10 @@ export function App({ initialState, bypassTitle = false }: { initialState?: Game
     if (nextRun.status === "finished") {
       const { report } = finalizeCatchUpRun(nextRun, mission, merc, loadout);
       setState((s) => completeCatchUpDispatch({ ...s, activeCatchUpRun: nextRun }, report));
-      setReport(report);
       setSelectedMissionId(run.missionId);
       setSelectedMercId(run.mercId);
-      setScreen("report");
+      setReport(null);
+      setScreen("desk");
     } else {
       setState((s) => ({ ...s, activeCatchUpRun: nextRun }));
     }
@@ -574,6 +598,34 @@ export function App({ initialState, bypassTitle = false }: { initialState?: Game
         />
 
       <main className="main">
+        {reportReadyToast && (
+          <div
+            className="report-ready-toast"
+            data-testid="report-ready-toast"
+            role="status"
+            style={{
+              marginBottom: "1rem",
+              padding: "0.75rem 1rem",
+              border: "1px solid var(--cyan)",
+              background: "var(--panel-2)",
+              color: "var(--cyan)",
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
+              gap: "1rem",
+            }}
+          >
+            <span>{reportReadyToast}</span>
+            <span style={{ display: "flex", gap: "0.5rem" }}>
+              <button type="button" className="primary" onClick={() => setScreen("desk")}>
+                관제소로
+              </button>
+              <button type="button" className="ghost" onClick={() => setReportReadyToast(null)}>
+                닫기
+              </button>
+            </span>
+          </div>
+        )}
         {turnNotice && (
           <div
             className="turn-notice"
@@ -697,9 +749,11 @@ export function App({ initialState, bypassTitle = false }: { initialState?: Game
             generatedReports={state.generatedReports}
             onViewReport={(dispatchId, missionId, mercId) => {
               const r = resolveReport(state, dispatchId);
+              if (!isReportNarrativeReady(r)) return;
               setReport(r ?? null);
               setSelectedMissionId(missionId);
               setSelectedMercId(mercId);
+              setReportReadyToast(null);
               if (r && state.settledReports.includes(r.reportId)) {
                 setScreen("settled");
               } else {

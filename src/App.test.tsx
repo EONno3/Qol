@@ -22,6 +22,8 @@ function createStateWithFixer() {
     // 결정론적 검증을 위해 정적 데모 미션을 명시 주입한다.
     // 본편(A경로) 보드에는 mission_gen_* AI 미션만 노출되며, 아래 정적 ID는 나타나지 않는다.
     availableMissions: ["mission_lower_fuse_capacitor_01", "mission_mid_elneon_backdoor_01"],
+    // Desk 열람 게이트: AI 대기 없이 FALLBACK으로 즉시 열람 가능하게 (AI 전용 케이스는 별도 오버라이드)
+    aiNarratorEnabled: false,
   };
 }
 
@@ -108,6 +110,21 @@ describe("App 1턴 루프", () => {
 
   it("정산 이탈 후 재진입 및 최종 종결 시나리오", async () => {
     const randomSpy = vi.spyOn(Math, "random").mockReturnValue(0.01);
+    const originalFetch = globalThis.fetch;
+    globalThis.fetch = vi.fn(async (input: RequestInfo | URL) => {
+      const url = typeof input === "string" ? input : input.toString();
+      if (url.includes("/narrate")) {
+        return {
+          ok: true,
+          json: async () => ({ narrative: "테스트용 AI 서사" }),
+        } as Response;
+      }
+      if (url.includes("/world-state")) {
+        return { ok: true, json: async () => ({}) } as Response;
+      }
+      return originalFetch(input as RequestInfo);
+    }) as typeof fetch;
+
     render(<App initialState={createStateWithFixer()} />);
 
     // 1. 첫 번째 미션 수주 및 출격
@@ -129,7 +146,7 @@ describe("App 1턴 루프", () => {
     // 3. 파견 완료 후 정산 진입하기 위해 파견 관제소로 이동
     fireEvent.click(screen.getByRole("button", { name: /파견 관제소/ }));
     fireEvent.click(screen.getByText("[Debug: 시간 가속]"));
-    const reportBtn = await screen.findByRole("button", { name: "보고서 열람" });
+    const reportBtn = await screen.findByRole("button", { name: "보고서 열람" }, { timeout: 5000 });
     fireEvent.click(reportBtn);
 
     // 정산 버튼 클릭 -> settled 화면 진입
@@ -171,6 +188,7 @@ describe("App 1턴 루프", () => {
     expect(within(freeMercRow).queryByText(/작전 중/)).toBeNull();
 
     randomSpy.mockRestore();
+    globalThis.fetch = originalFetch;
   });
 
   it("aiNarratorEnabled + 시간 가속 후 /narrate 응답이 FALLBACK 템플릿으로 덮이지 않는다", async () => {
